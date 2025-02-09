@@ -1,29 +1,30 @@
 package net.zam.melodyapi.common.network;
 
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
-import net.zam.melodyapi.common.network.packet.ClaimRewardPacket;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.network.simple.SimpleChannel;
+import net.zam.melodyapi.MelodyAPI;
+import net.zam.melodyapi.api.util.packet.ClaimRewardPacket;
+import net.zam.melodyapi.api.util.packet.ConsumeLootBoxItemsPacket;
+
 
 public class NetworkHandler {
     private static final String PROTOCOL_VERSION = "1";
 
-    @SubscribeEvent
-    public static void register(final RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar registrar = event.registrar(PROTOCOL_VERSION);
+    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
+            MelodyAPI.id("network"),
+            () -> PROTOCOL_VERSION,
+            PROTOCOL_VERSION::equals,
+            PROTOCOL_VERSION::equals
+    );
 
-        // Register ClaimRewardPacket
-        registrar.playToClient(
-                ClaimRewardPacket.TYPE,
-                ClaimRewardPacket.STREAM_CODEC,
-                ClaimRewardPacket::handleOnClient
-        );
+    public static void register() {
+        CHANNEL.registerMessage(0, ClaimRewardPacket.class, ClaimRewardPacket::toBytes, ClaimRewardPacket::new, ClaimRewardPacket::handle);
+        CHANNEL.messageBuilder(ConsumeLootBoxItemsPacket.class, 1).encoder(ConsumeLootBoxItemsPacket::toBytes).decoder(ConsumeLootBoxItemsPacket::new).consumerMainThread(ConsumeLootBoxItemsPacket::handle).add();
+    }
 
-        registrar.playToServer(
-                ClaimRewardPacket.TYPE,
-                ClaimRewardPacket.STREAM_CODEC,
-                ClaimRewardPacket::handleOnServer
-        );
+    public static <MSG> void sendToServer(MSG packet) {
+        CHANNEL.send(PacketDistributor.SERVER.noArg(), packet);
     }
 }
+

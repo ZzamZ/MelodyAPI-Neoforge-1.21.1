@@ -1,5 +1,11 @@
 package net.zam.melodyapi;
 
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.zam.melodyapi.common.gui.casetest.TestCaseScreen;
+import net.zam.melodyapi.common.registry.MelodyItems;
+import net.zam.melodyapi.common.registry.MelodyMenuTypes;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -42,16 +48,25 @@ public class MelodyAPI {
     public MelodyAPI(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
 
+        MelodyItems.register(modEventBus);
+        MelodyMenuTypes.register(modEventBus);
+
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
     }
 
+    public static ResourceLocation id(String path) {
+        return ResourceLocation.fromNamespaceAndPath(MelodyAPI.MOD_ID, path);
+    }
+
+
+
+
     @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-
         }
     }
 }

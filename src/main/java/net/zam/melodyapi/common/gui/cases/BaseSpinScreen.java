@@ -9,8 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.RecordItem;
 import net.zam.melodyapi.MelodyAPI;
-import net.zam.melodyapi.common.item.rarity.Rarity;
 import net.zam.melodyapi.common.item.rarity.RarityItem;
 
 import java.util.ArrayList;
@@ -27,9 +27,9 @@ public class BaseSpinScreen extends Screen {
     private float itemScrollPosition;
     private float speed;
     private boolean isSlowingDown;
-    private long stopTime;
+    private long stopTime; // To track when the spinning stops
     private boolean rewardSelected;
-    private final Component caseTitle;
+    private final Component caseTitle; // Add a case title
     private Player player;
     private RarityItem selectedItem;
 
@@ -42,16 +42,18 @@ public class BaseSpinScreen extends Screen {
         this.random = new Random();
         this.tickCounter = 0;
         this.itemScrollPosition = 0;
-        this.speed = 15.0f;
+        this.speed = 15.0f; // Start with a higher speed
         this.isSlowingDown = false;
         this.rewardSelected = false;
 
         this.items = new ArrayList<>(lootItems);
 
-        while (displayedItems.size() < 30) {
+        // Prepopulate the displayed items list to ensure it starts full
+        while (displayedItems.size() < 30) { // Ensure the displayed items fill the entire area
             addRandomItemToDisplayedItems();
         }
 
+        // Adjust initial position to start at the left bound
         itemScrollPosition = 0.0f;
     }
 
@@ -64,47 +66,58 @@ public class BaseSpinScreen extends Screen {
     @Override
     public void tick() {
         tickCounter++;
-        if (tickCounter >= 30 && !isSlowingDown) {
+        if (tickCounter >= 30 && !isSlowingDown) { // Start slowing down after 30 ticks (1.5 seconds)
             isSlowingDown = true;
         }
         if (isSlowingDown) {
-            speed = Math.max(0.1f, speed * 0.95f);
+            speed = Math.max(0.1f, speed * 0.95f); // Adjusted slow down rate for approximately 5 seconds duration
             if (speed <= 0.1f && !rewardSelected) {
                 speed = 0;
                 rewardSelected = true;
-                stopTime = System.currentTimeMillis();
-                selectedItem = getSelectedReward();
+                stopTime = System.currentTimeMillis(); // Set the stop time when the spinning stops
+                selectedItem = getSelectedReward(); // Ensure the reward is selected
             }
         }
         itemScrollPosition += speed;
 
+        // Ensure the displayedItems list always has enough items to scroll through
         while (displayedItems.size() < itemScrollPosition / 18 + 50) {
             addRandomItemToDisplayedItems();
         }
 
-        if (rewardSelected && System.currentTimeMillis() - stopTime >= 500) {
-            this.minecraft.setScreen(new BaseLootBoxRewardScreen(List.of(selectedItem), this.minecraft.player, caseTitle));
+        if (rewardSelected && System.currentTimeMillis() - stopTime >= 500) { // Check if half a second has passed
+            this.minecraft.setScreen(new net.zam.melodyapi.api.gui.BaseLootBoxRewardScreen(List.of(selectedItem), this.minecraft.player, caseTitle));
         }
     }
 
     private RarityItem getSelectedReward() {
         int selectedIndex = (int) ((itemScrollPosition + 8) / 16) % displayedItems.size();
-        if (selectedIndex < 0) selectedIndex += displayedItems.size();
+        if (selectedIndex < 0) selectedIndex += displayedItems.size(); // Ensure positive index
         return displayedItems.get(selectedIndex);
     }
 
+    @Override
+    public void onClose() {
+        // Prevent closing the screen until claim button is clicked
+    }
+
     private void addRandomItemToDisplayedItems() {
-        int rarityChance = random.nextInt(10000);
+        int rarityChance = random.nextInt(10000); // 0 to 9999
 
         if (rarityChance < 8750) {
+            // 87.5% chance for common (8750 out of 10000)
             displayedItems.add(getRandomItemByRarity(Rarity.COMMON));
         } else if (rarityChance < 9675) {
+            // 9.25% chance for uncommon (925 out of 10000)
             displayedItems.add(getRandomItemByRarity(Rarity.UNCOMMON));
         } else if (rarityChance < 9850) {
+            // 1.75% chance for rare (175 out of 10000)
             displayedItems.add(getRandomItemByRarity(Rarity.RARE));
         } else if (rarityChance < 9966) {
+            // 1.16% chance for very rare (116 out of 10000)
             displayedItems.add(getRandomItemByRarity(Rarity.VERY_RARE));
         } else {
+            // 0.34% chance for ultra rare (34 out of 10000)
             displayedItems.add(getRandomItemByRarity(Rarity.ULTRA_RARE));
         }
     }
@@ -130,41 +143,70 @@ public class BaseSpinScreen extends Screen {
         int screenWidth = this.width;
         int screenHeight = this.height;
 
-        int x = (screenWidth - 176) / 2;
-        int y = (screenHeight - 70) / 2;
+        int x = (screenWidth - 176) / 2; // Adjust width for the top part
+        int y = (screenHeight - 70) / 2; // Adjust height for the top part
 
-        guiGraphics.blit(texture, x, y, 0, 0, 176, 79);
+        guiGraphics.blit(texture, x, y, 0, 0, 176, 79); // Only draw the top part of the texture (176x70)
 
-        int scissorX = (int) ((double) (x + 5) / this.width * this.minecraft.getWindow().getScreenWidth());
+        // Enable scissor test to clip the rendering area
+        int scissorX = (int) ((double) (x + 3.5) / this.width * this.minecraft.getWindow().getScreenWidth()); // Adjusted left boundary
         int scissorY = (int) ((double) (this.height - (y + 23 + 18)) / this.height * this.minecraft.getWindow().getScreenHeight());
-        int scissorWidth = (int) ((double) 170 / this.width * this.minecraft.getWindow().getScreenWidth());
+        int scissorWidth = (int) ((double) 170.25 / this.width * this.minecraft.getWindow().getScreenWidth()); // Adjusted right boundary
         int scissorHeight = (int) ((double) 18 / this.height * this.minecraft.getWindow().getScreenHeight());
         RenderSystem.enableScissor(scissorX, scissorY, scissorWidth, scissorHeight);
 
-        renderScrollingItems(guiGraphics, x, y + 23);
+        renderScrollingItems(guiGraphics, x, y + 23); // Adjusted y position for scrolling items
 
         RenderSystem.disableScissor();
 
+        int selectedIndex = (int) ((itemScrollPosition + 8) / 16) % displayedItems.size();
+        if (selectedIndex < 0) selectedIndex += displayedItems.size(); // Ensure positive index
+        RarityItem selectedItem = displayedItems.get(selectedIndex);
+
+        Component displayNameOrDescription;
+        ItemStack selectedItemStack = selectedItem.getItemStack();
+        if (selectedItemStack.getItem() instanceof RecordItem) {
+            displayNameOrDescription = Component.translatable(selectedItemStack.getDescriptionId() + ".desc");
+        } else {
+            displayNameOrDescription = selectedItemStack.getHoverName();
+        }
+
+        drawCenteredString(guiGraphics, this.font, displayNameOrDescription.getString(), this.width / 2, y + 45, getRarityColor(selectedItem.getRarity()));
+
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
-        drawCenteredString(guiGraphics, this.font, caseTitle.getString(), this.width / 2, y - 10, 0xFFFFFF);
+
+        // Draw the case title above the spinning items (after super.render to ensure it's on top)
+        drawCenteredString(guiGraphics, this.font, caseTitle.getString(), this.width / 2, y - 5 + 14, 0xFFFFFF); // Moved the title down
+    }
+
+    private void drawCenteredString(GuiGraphics guiGraphics, Font font, String text, int centerX, int y, int color) {
+        int width = font.width(text);
+        guiGraphics.drawString(font, text, centerX - width / 2, y, color, false);
     }
 
     private void renderScrollingItems(GuiGraphics guiGraphics, int x, int y) {
-        int itemSize = 16;
+        int itemSize = 16; // Size of each item slot
         int totalItems = displayedItems.size();
-        int guiLeftBound = x + 5;
-        int guiRightBound = x + 173;
+        int guiLeftBound = x + 5; // Adjusted left boundary
+        int guiRightBound = x + 173; // Adjusted right boundary
 
+        // Calculate the starting x position for the center item
         int startX = x + (176 / 2) - (itemSize / 2);
         for (int i = 0; i < totalItems; i++) {
             float itemX = startX + ((i - (itemScrollPosition / itemSize)) * itemSize);
-            if (itemX >= guiLeftBound - itemSize && itemX <= guiRightBound) {
+            if (itemX >= guiLeftBound - itemSize && itemX <= guiRightBound) { // Ensure items stay within bounds
                 RarityItem rarityItem = displayedItems.get(i % totalItems);
-                guiGraphics.fill((int) itemX - 1, y - 1, (int) itemX + 17, y + 17, getRarityColor(rarityItem.getRarity()));
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f); // Remove fade effect
+                guiGraphics.fill((int) itemX - 1, y - 1, (int) itemX + 17, y + 17, getRarityColor(rarityItem.getRarity())); // Draw border
                 guiGraphics.renderItem(rarityItem.getItemStack(), (int) itemX, y);
                 guiGraphics.renderItemDecorations(this.font, rarityItem.getItemStack(), (int) itemX, y);
+                RenderSystem.disableBlend();
             }
         }
+
+        guiGraphics.fill(startX + itemSize / 2, y - 1, startX + itemSize / 2 + 1, y + 17, 0xFF555555); // Dark grey line
     }
 
     private int getRarityColor(Rarity rarity) {

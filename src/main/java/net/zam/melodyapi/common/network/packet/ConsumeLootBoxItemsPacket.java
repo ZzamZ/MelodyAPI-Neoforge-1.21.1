@@ -1,36 +1,40 @@
 package net.zam.melodyapi.common.network.packet;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.zam.melodyapi.common.gui.cases.BaseLootBoxMenu;
+import net.minecraftforge.network.NetworkEvent;
+import net.zam.melodyapi.api.gui.BaseLootBoxMenu;
 
+import java.util.function.Supplier;
 
-public record ConsumeLootBoxItemsPacket(ItemStack keyItem, ItemStack caseItem) implements CustomPacketPayload {
-    public static final CustomPacketPayload.Type<ConsumeLootBoxItemsPacket> TYPE =
-            new CustomPacketPayload.Type<>(new ResourceLocation("melodyapi", "consume_lootbox_items"));
-    public static final StreamCodec<FriendlyByteBuf, ConsumeLootBoxItemsPacket> STREAM_CODEC =
-            StreamCodec.composite(
-                    FriendlyByteBuf::writeItemStack, ConsumeLootBoxItemsPacket::keyItem,
-                    FriendlyByteBuf::writeItemStack, ConsumeLootBoxItemsPacket::caseItem,
-                    ConsumeLootBoxItemsPacket::new
-            );
+public class ConsumeLootBoxItemsPacket {
 
-    @Override
-    public CustomPacketPayload.Type<?> type() {
-        return TYPE;
+    private final ItemStack keyItem;
+    private final ItemStack caseItem;
+
+    public ConsumeLootBoxItemsPacket(final ItemStack keyItem, final ItemStack caseItem) {
+        this.keyItem = keyItem;
+        this.caseItem = caseItem;
     }
 
-    public static void handleOnServer(ConsumeLootBoxItemsPacket packet, ServerPlayer player) {
-        if (player.containerMenu instanceof BaseLootBoxMenu lootBoxMenu) {
-            lootBoxMenu.consumeItems(player, packet.keyItem, packet.caseItem);
-        }
+    public ConsumeLootBoxItemsPacket(FriendlyByteBuf buf) {
+        this.keyItem = buf.readItem();
+        this.caseItem = buf.readItem();
     }
 
-    public static void handleOnClient(ConsumeLootBoxItemsPacket packet, net.minecraft.client.Minecraft client) {
-        // Client-side handling code (if needed)
+    public void toBytes(FriendlyByteBuf buf) {
+        buf.writeItemStack(keyItem, true);
+        buf.writeItemStack(caseItem, true);
+    }
+
+    public void handle(Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            ServerPlayer player = ctx.get().getSender();
+            if(player.containerMenu instanceof BaseLootBoxMenu) {
+                ((BaseLootBoxMenu) player.containerMenu).consumeItems(player, keyItem, caseItem);
+            }
+        });
+        ctx.get().setPacketHandled(true);
     }
 }

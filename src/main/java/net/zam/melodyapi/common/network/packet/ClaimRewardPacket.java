@@ -1,33 +1,51 @@
 package net.zam.melodyapi.common.network.packet;
 
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.network.NetworkEvent;
+import net.zam.melodyapi.api.item.RarityItem;
+import net.zam.melodyapi.api.util.Rarity;
 
-public record ClaimRewardPacket(ItemStack reward) implements CustomPacketPayload {
+import java.util.function.Supplier;
 
-    public static final CustomPacketPayload.Type<ClaimRewardPacket> TYPE =
-            new CustomPacketPayload.Type<>(new ResourceLocation("melodyapi", "claim_reward"));
+public class ClaimRewardPacket {
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, ClaimRewardPacket> STREAM_CODEC =
-            StreamCodec.of(
-                    RegistryFriendlyByteBuf::writeItem,
-                    buf -> new ClaimRewardPacket(buf.readItem())
-            );
+    private final RarityItem reward;
 
-    @Override
-    public CustomPacketPayload.Type<?> type() {
-        return TYPE;
+    public ClaimRewardPacket(RarityItem reward) {
+        this.reward = reward;
     }
 
-    public static void handleOnServer(ClaimRewardPacket packet, ServerPlayer player) {
-        player.getInventory().add(packet.reward());
+    public ClaimRewardPacket(FriendlyByteBuf buf) {
+        this.reward = new RarityItem(buf.readItem(), buf.readEnum(Rarity.class));
     }
 
-    public static void handleOnClient(ClaimRewardPacket packet, net.minecraft.world.entity.player.Player player) {
-        // Implement client-side logic here
+    public void toBytes(FriendlyByteBuf buf) {
+        buf.writeItem(reward.getItemStack());
+        buf.writeEnum(reward.getRarity());
+    }
+
+    public void handle(Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            ServerPlayer player = ctx.get().getSender();
+            if (player != null) {
+                player.closeContainer();
+                ItemStack stack = reward.getItemStack().copy();
+                boolean added = player.getInventory().add(stack);
+                if(added && stack.isEmpty()) {
+                    player.inventoryMenu.broadcastChanges();
+                } else {
+                    ItemEntity itemEntity;
+                    itemEntity = player.drop(stack, false);
+                    if (itemEntity != null) {
+                        itemEntity.setNoPickUpDelay();
+                        itemEntity.setTarget(player.getUUID());
+                    }
+                }
+            }
+        });
+        ctx.get().setPacketHandled(true);
     }
 }
