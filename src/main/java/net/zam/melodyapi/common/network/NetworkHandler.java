@@ -4,8 +4,8 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 import net.zam.melodyapi.MelodyAPI;
-import net.zam.melodyapi.api.util.packet.ClaimRewardPacket;
-import net.zam.melodyapi.api.util.packet.ConsumeLootBoxItemsPacket;
+import net.zam.melodyapi.common.network.packet.ClaimRewardPacket;
+import net.zam.melodyapi.common.network.packet.ConsumeLootBoxItemsPacket;
 
 
 public class NetworkHandler {

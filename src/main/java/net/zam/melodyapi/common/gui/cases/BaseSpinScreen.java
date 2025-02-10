@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.RecordItem;
 import net.zam.melodyapi.MelodyAPI;
+import net.zam.melodyapi.common.item.rarity.Rarity;
 import net.zam.melodyapi.common.item.rarity.RarityItem;
 
 import java.util.ArrayList;
@@ -86,7 +87,7 @@ public class BaseSpinScreen extends Screen {
         }
 
         if (rewardSelected && System.currentTimeMillis() - stopTime >= 500) { // Check if half a second has passed
-            this.minecraft.setScreen(new net.zam.melodyapi.api.gui.BaseLootBoxRewardScreen(List.of(selectedItem), this.minecraft.player, caseTitle));
+            this.minecraft.setScreen(new BaseLootBoxRewardScreen(List.of(selectedItem), this.minecraft.player, caseTitle));
         }
     }
 

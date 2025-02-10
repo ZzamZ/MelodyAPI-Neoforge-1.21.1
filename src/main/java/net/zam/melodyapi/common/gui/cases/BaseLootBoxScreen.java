@@ -1,4 +1,4 @@
-package net.zam.melodyapi.api.gui;
+package net.zam.melodyapi.common.gui.cases;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.Font;
@@ -13,12 +13,12 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.zam.melodyapi.MelodyAPI;
-import net.zam.melodyapi.api.item.RarityItem;
-import net.zam.melodyapi.api.util.Rarity;
+import net.zam.melodyapi.common.item.rarity.Rarity;
+import net.zam.melodyapi.common.item.rarity.RarityItem;
 
 import java.util.List;
 
-public class BaseLootBoxScreen<T extends net.zam.melodyapi.api.gui.BaseLootBoxMenu<T>> extends AbstractContainerScreen<T> {
+public class BaseLootBoxScreen<T extends BaseLootBoxMenu<T>> extends AbstractContainerScreen<T> {
     private final ResourceLocation texture;
     private final ItemStack requiredKeyItem;
     private final ItemStack requiredCaseItem;

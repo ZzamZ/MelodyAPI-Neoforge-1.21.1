@@ -1,4 +1,4 @@
-package net.zam.melodyapi.api.gui;
+package net.zam.melodyapi.common.gui.cases;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.Font;
@@ -13,9 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.RecordItem;
 import net.zam.melodyapi.MelodyAPI;
-import net.zam.melodyapi.api.item.RarityItem;
-import net.zam.melodyapi.api.util.network.NetworkHandler;
-import net.zam.melodyapi.api.util.packet.ClaimRewardPacket;
+import net.zam.melodyapi.common.item.rarity.RarityItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

@@ -1,4 +1,4 @@
-package net.zam.melodyapi.common.registry;
+package net.zam.melodyapi.registry;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.AbstractContainerMenu;

@@ -5,8 +5,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
-import net.zam.melodyapi.api.item.RarityItem;
-import net.zam.melodyapi.api.util.Rarity;
+import net.zam.melodyapi.common.item.rarity.Rarity;
+import net.zam.melodyapi.common.item.rarity.RarityItem;
 
 import java.util.function.Supplier;
 

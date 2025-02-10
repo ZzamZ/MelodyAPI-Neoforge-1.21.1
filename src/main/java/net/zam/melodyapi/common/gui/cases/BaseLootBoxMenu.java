@@ -1,4 +1,4 @@
-package net.zam.melodyapi.api.gui;
+package net.zam.melodyapi.common.gui.cases;
 
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
@@ -7,9 +7,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.zam.melodyapi.api.item.RarityItem;
-import net.zam.melodyapi.api.util.network.NetworkHandler;
-import net.zam.melodyapi.api.util.packet.ConsumeLootBoxItemsPacket;
+import net.zam.melodyapi.common.gui.cases.ReadOnlyInventory;
+import net.zam.melodyapi.common.item.rarity.RarityItem;
 
 import java.util.List;
 
