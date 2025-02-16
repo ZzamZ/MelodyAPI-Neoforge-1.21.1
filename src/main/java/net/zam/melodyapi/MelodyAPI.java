@@ -1,6 +1,10 @@
 package net.zam.melodyapi;
 
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.zam.melodyapi.common.network.ClaimRewardPacket;
+import net.zam.melodyapi.common.network.ConsumeLootBoxItemsPacket;
 import net.zam.melodyapi.registry.MelodyItems;
 import net.zam.melodyapi.registry.MelodyMenuTypes;
 import org.slf4j.Logger;
@@ -23,6 +27,7 @@ public class MelodyAPI {
 
     public MelodyAPI(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::registerPayloadHandlers);
 
         MelodyItems.register(modEventBus);
         MelodyMenuTypes.register(modEventBus);
@@ -32,11 +37,17 @@ public class MelodyAPI {
     private void commonSetup(final FMLCommonSetupEvent event) {
     }
 
+    @SubscribeEvent
+    private void registerPayloadHandlers(final RegisterPayloadHandlersEvent event) {
+        final PayloadRegistrar registrar = event.registrar("1");
+
+        registrar.playToServer(ClaimRewardPacket.TYPE, ClaimRewardPacket.STREAM_CODEC, ClaimRewardPacket::handle);
+        registrar.playToServer(ConsumeLootBoxItemsPacket.TYPE, ConsumeLootBoxItemsPacket.STREAM_CODEC, ConsumeLootBoxItemsPacket::handle);
+    }
+
     public static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(MelodyAPI.MOD_ID, path);
     }
-
-
 
 
     @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)

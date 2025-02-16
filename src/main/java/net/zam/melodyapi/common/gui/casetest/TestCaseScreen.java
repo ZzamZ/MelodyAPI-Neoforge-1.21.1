@@ -1,6 +1,5 @@
 package net.zam.melodyapi.common.gui.casetest;
 
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -16,10 +15,5 @@ public class TestCaseScreen extends BaseLootBoxScreen<TestCaseMenu> {
 
     public TestCaseScreen(TestCaseMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title, CUSTOM_TEXTURE, REQUIRED_KEY_ITEM, REQUIRED_CASE_ITEM);
-    }
-
-    @Override
-    protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {
-        super.renderBg(guiGraphics, partialTicks, mouseX, mouseY);
     }
 }

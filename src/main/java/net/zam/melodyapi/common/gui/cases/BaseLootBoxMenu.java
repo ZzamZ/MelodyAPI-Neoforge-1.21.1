@@ -7,8 +7,9 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.zam.melodyapi.common.gui.cases.ReadOnlyInventory;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.zam.melodyapi.common.item.rarity.RarityItem;
+import net.zam.melodyapi.common.network.ConsumeLootBoxItemsPacket;
 
 import java.util.List;
 
@@ -69,7 +70,7 @@ public abstract class BaseLootBoxMenu<T extends BaseLootBoxMenu<T>> extends Abst
 
         if (keyConsumed && caseConsumed) {
             if (player.level().isClientSide()) {
-                NetworkHandler.sendToServer(new ConsumeLootBoxItemsPacket(keyItem, caseItem));
+                PacketDistributor.sendToServer(new ConsumeLootBoxItemsPacket(keyItem, caseItem));
             }
             return true;
         }

@@ -12,7 +12,7 @@ import net.minecraft.world.level.Level;
 import net.zam.melodyapi.common.gui.casetest.TestCaseMenu;
 
 public class TestCase extends Item {
-    public TestCase(Item.Properties properties) {
+    public TestCase(Properties properties) {
         super(properties);
     }
 

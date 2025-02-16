@@ -4,15 +4,16 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.RecordItem;
 import net.zam.melodyapi.MelodyAPI;
 import net.zam.melodyapi.common.item.rarity.Rarity;
 import net.zam.melodyapi.common.item.rarity.RarityItem;
+import net.zam.melodyapi.common.util.TextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class BaseSpinScreen extends Screen {
 
     public BaseSpinScreen(List<RarityItem> lootItems, Component caseTitle) {
         super(Component.literal("Spinning..."));
-        this.texture = new ResourceLocation(MelodyAPI.MOD_ID, "textures/gui/spin_gui.png");
+        this.texture = MelodyAPI.id("textures/gui/spin_gui.png");
         this.caseTitle = caseTitle;
         this.displayedItems = new ArrayList<>();
         this.spinDuration = 400 + new Random().nextInt(100);
@@ -137,17 +138,25 @@ public class BaseSpinScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(guiGraphics);
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         RenderSystem.setShaderTexture(0, texture);
-
         int screenWidth = this.width;
         int screenHeight = this.height;
 
         int x = (screenWidth - 176) / 2; // Adjust width for the top part
         int y = (screenHeight - 70) / 2; // Adjust height for the top part
-
         guiGraphics.blit(texture, x, y, 0, 0, 176, 79); // Only draw the top part of the texture (176x70)
+    }
+
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        super.render(guiGraphics, mouseX, mouseY, partialTicks);
+        int screenWidth = this.width;
+        int screenHeight = this.height;
+
+        int x = (screenWidth - 176) / 2; // Adjust width for the top part
+        int y = (screenHeight - 70) / 2; // Adjust height for the top part
 
         // Enable scissor test to clip the rendering area
         int scissorX = (int) ((double) (x + 3.5) / this.width * this.minecraft.getWindow().getScreenWidth()); // Adjusted left boundary
@@ -164,17 +173,12 @@ public class BaseSpinScreen extends Screen {
         if (selectedIndex < 0) selectedIndex += displayedItems.size(); // Ensure positive index
         RarityItem selectedItem = displayedItems.get(selectedIndex);
 
-        Component displayNameOrDescription;
         ItemStack selectedItemStack = selectedItem.getItemStack();
-        if (selectedItemStack.getItem() instanceof RecordItem) {
-            displayNameOrDescription = Component.translatable(selectedItemStack.getDescriptionId() + ".desc");
-        } else {
-            displayNameOrDescription = selectedItemStack.getHoverName();
-        }
+        Component displayNameOrDescription = selectedItemStack.getItem().components().has(DataComponents.JUKEBOX_PLAYABLE) ?
+                Component.translatable(selectedItemStack.getDescriptionId() + ".desc") :
+                selectedItemStack.getHoverName();
 
-        drawCenteredString(guiGraphics, this.font, displayNameOrDescription.getString(), this.width / 2, y + 45, getRarityColor(selectedItem.getRarity()));
-
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
+        TextUtils.drawCenteredWrappedString(guiGraphics, this.font, displayNameOrDescription.getString(), this.width / 2, y + 45, 170, getRarityColor(selectedItem.getRarity()));
 
         // Draw the case title above the spinning items (after super.render to ensure it's on top)
         drawCenteredString(guiGraphics, this.font, caseTitle.getString(), this.width / 2, y - 5 + 14, 0xFFFFFF); // Moved the title down

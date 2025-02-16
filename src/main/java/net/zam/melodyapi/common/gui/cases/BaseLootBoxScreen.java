@@ -66,14 +66,11 @@ public class BaseLootBoxScreen<T extends BaseLootBoxMenu<T>> extends AbstractCon
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {
-        this.renderBackground(guiGraphics);
         guiGraphics.blit(texture, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
     }
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(guiGraphics);
-        guiGraphics.blit(texture, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
         renderRarityBorders(guiGraphics);
         drawCenteredString(guiGraphics, this.font, this.title.getString(), this.leftPos + this.imageWidth / 2, this.topPos + 10, 0xFFFFFF);

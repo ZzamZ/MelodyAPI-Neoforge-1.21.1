@@ -5,15 +5,17 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.RecordItem;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.zam.melodyapi.MelodyAPI;
 import net.zam.melodyapi.common.item.rarity.RarityItem;
+import net.zam.melodyapi.common.network.ClaimRewardPacket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,7 +34,7 @@ public class BaseLootBoxRewardScreen extends Screen {
 
     public BaseLootBoxRewardScreen(List<RarityItem> rewardItems, Player player, Component caseTitle) {
         super(Component.literal("Reward"));
-        this.texture = new ResourceLocation(MelodyAPI.MOD_ID, "textures/gui/case.png"); // Adjust with your texture
+        this.texture = MelodyAPI.id("textures/gui/case.png"); // Adjust with your texture
         this.rewardItems = rewardItems;
         this.player = player;
         RarityItem rewardItem = rewardItems.get(0);
@@ -58,7 +60,7 @@ public class BaseLootBoxRewardScreen extends Screen {
 
     private Component determineTitle(RarityItem rarityItem) {
         ItemStack itemStack = rarityItem.getItemStack();
-        if (itemStack.getItem() instanceof RecordItem) {
+        if(itemStack.getItem().components().has(DataComponents.JUKEBOX_PLAYABLE)) {
             return Component.translatable(itemStack.getDescriptionId() + ".desc");
         } else {
             return itemStack.getHoverName();
@@ -105,13 +107,13 @@ public class BaseLootBoxRewardScreen extends Screen {
 
         LOGGER.info("Player's received items saved: " + receivedItems);
 
-        NetworkHandler.CHANNEL.sendToServer(new ClaimRewardPacket(selectedItem));
+        PacketDistributor.sendToServer(new ClaimRewardPacket(selectedItem));
     }
 
     private void announceReward() {
         RarityItem selectedItem = rewardItems.get(0);
         ItemStack selectedItemStack = selectedItem.getItemStack();
-        Component itemNameOrDescription = selectedItemStack.getItem() instanceof RecordItem ?
+        Component itemNameOrDescription = selectedItemStack.getItem().components().has(DataComponents.JUKEBOX_PLAYABLE) ?
                 Component.translatable(selectedItemStack.getDescriptionId() + ".desc") :
                 selectedItemStack.getHoverName();
 
@@ -136,18 +138,24 @@ public class BaseLootBoxRewardScreen extends Screen {
         player.sendSystemMessage(message);
     }
 
-
-
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground(guiGraphics);
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         RenderSystem.setShaderTexture(0, texture);
-
         int screenWidth = this.width;
         int screenHeight = this.height;
         int x = (screenWidth - 176) / 2;
         int y = (screenHeight - 70) / 2;
         guiGraphics.blit(texture, x, y, 0, 0, 176, 61);
+    }
+
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+        super.render(guiGraphics, mouseX, mouseY, partialTicks);
+        int screenWidth = this.width;
+        int screenHeight = this.height;
+        int x = (screenWidth - 176) / 2;
+        int y = (screenHeight - 70) / 2;
         drawCenteredString(guiGraphics, this.font, this.title.getString(), this.width / 2, y + 8, titleColor);
 
         for (int i = 0; i < rewardItems.size(); i++) {
@@ -158,8 +166,6 @@ public class BaseLootBoxRewardScreen extends Screen {
             guiGraphics.renderItem(itemStack, itemX, itemY);
             guiGraphics.renderItemDecorations(this.font, itemStack, itemX, itemY);
         }
-
-        super.render(guiGraphics, mouseX, mouseY, partialTicks);
     }
 
     private void drawCenteredString(GuiGraphics guiGraphics, Font font, String text, int centerX, int y, int color) {
