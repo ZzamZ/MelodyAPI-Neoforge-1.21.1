@@ -12,11 +12,21 @@ public class TextUtils {
         List<String> wrappedLines = wrapString(font, text, maxWidth);
         int lineHeight = font.lineHeight;
 
-        // Calculate starting Y position to center all lines
+        for (int i = 0; i < wrappedLines.size(); i++) {
+            int width = font.width(wrappedLines.get(i));
+            guiGraphics.drawString(font, wrappedLines.get(i), x - width / 2, y + (i * lineHeight), color, false);
+        }
+    }
+
+    public static void drawCenteredVerticallyWrappedString(GuiGraphics guiGraphics, Font font, String text, int x, int y, int maxWidth, int color) {
+        List<String> wrappedLines = wrapString(font, text, maxWidth);
+        int lineHeight = font.lineHeight;
+
         int startY = y - (wrappedLines.size() * lineHeight) / 2;
 
         for (int i = 0; i < wrappedLines.size(); i++) {
-            guiGraphics.drawCenteredString(font, wrappedLines.get(i), x, y + (i * lineHeight), color);
+            int width = font.width(wrappedLines.get(i));
+            guiGraphics.drawString(font, wrappedLines.get(i), x - width / 2, startY + (i * lineHeight), color, false);
         }
     }
 

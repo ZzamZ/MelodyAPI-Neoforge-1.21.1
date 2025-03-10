@@ -1,6 +1,8 @@
 package net.zam.melodyapi.common.gui.cases;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.Container;
+import net.minecraft.world.LockCode;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -8,6 +10,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.zam.melodyapi.common.data.MelodySavedData;
 import net.zam.melodyapi.common.item.rarity.RarityItem;
 import net.zam.melodyapi.common.network.ConsumeLootBoxItemsPacket;
 
@@ -17,19 +20,27 @@ public abstract class BaseLootBoxMenu<T extends BaseLootBoxMenu<T>> extends Abst
     private final ReadOnlyInventory lootInventory;
     private final List<RarityItem> lootItems;
 
-    protected BaseLootBoxMenu(MenuType<T> menuType, int id, Inventory playerInventory, List<RarityItem> lootItems) {
+    protected BaseLootBoxMenu(MenuType<T> menuType, int id, Inventory playerInventory, List<RarityItem> lootItems, Player player) {
         super(menuType, id);
         this.lootItems = lootItems;
 
         this.lootInventory = new ReadOnlyInventory(this.lootItems.size());
+
         for (int i = 0; i < this.lootItems.size(); i++) {
-            this.lootInventory.setItem(i, this.lootItems.get(i).getItemStack());
+            ItemStack itemStack = this.lootItems.get(i).getItemStack();
+            if(player != null && player.getServer() != null) {
+                if(MelodySavedData.isCollected(player.getServer(), player, itemStack.getItem())) {
+                    itemStack.set(DataComponents.LOCK, new LockCode("1234")); // Adding a random data component when an item is collected
+                }
+            }
+
+            this.lootInventory.setItem(i, itemStack);
         }
 
         // Add slots for displaying loot items
         for (int row = 0; row < 5; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new ReadOnlySlot(lootInventory, row * 9 + col, 8 + col * 18, 70 + row * 18));
+                this.addSlot(new ReadOnlySlot(lootInventory, row * 9 + col, 8 + col * 18, 70 + row * 18));
             }
         }
     }
@@ -41,6 +52,10 @@ public abstract class BaseLootBoxMenu<T extends BaseLootBoxMenu<T>> extends Abst
 
     public List<RarityItem> getLootItems() {
         return lootItems;
+    }
+
+    public ReadOnlyInventory getLootInventory() {
+        return lootInventory;
     }
 
     public boolean consumeItems(Player player, ItemStack keyItem, ItemStack caseItem) {

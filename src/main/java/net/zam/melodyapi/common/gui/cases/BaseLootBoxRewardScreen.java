@@ -16,6 +16,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.zam.melodyapi.MelodyAPI;
 import net.zam.melodyapi.common.item.rarity.RarityItem;
 import net.zam.melodyapi.common.network.ClaimRewardPacket;
+import net.zam.melodyapi.common.util.TextUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,7 +35,7 @@ public class BaseLootBoxRewardScreen extends Screen {
 
     public BaseLootBoxRewardScreen(List<RarityItem> rewardItems, Player player, Component caseTitle) {
         super(Component.literal("Reward"));
-        this.texture = MelodyAPI.id("textures/gui/case.png"); // Adjust with your texture
+        this.texture = MelodyAPI.id("textures/gui/spin_gui.png");
         this.rewardItems = rewardItems;
         this.player = player;
         RarityItem rewardItem = rewardItems.get(0);
@@ -75,7 +76,7 @@ public class BaseLootBoxRewardScreen extends Screen {
         int x = (screenWidth - 176) / 2;
         int y = (screenHeight - 70) / 2;
         int buttonX = x + 38;
-        int buttonY = y + 35;
+        int buttonY = y + 55;
 
         this.claimButton = Button.builder(Component.literal("Claim"), button -> {
             sendClaimRewardPacket();
@@ -144,9 +145,9 @@ public class BaseLootBoxRewardScreen extends Screen {
         RenderSystem.setShaderTexture(0, texture);
         int screenWidth = this.width;
         int screenHeight = this.height;
-        int x = (screenWidth - 176) / 2;
-        int y = (screenHeight - 70) / 2;
-        guiGraphics.blit(texture, x, y, 0, 0, 176, 61);
+        int x = (screenWidth - 176) / 2; // Adjust width for the top part
+        int y = (screenHeight - 70) / 2; // Adjust height for the top part
+        guiGraphics.blit(texture, x, y, 0, 0, 176, 79); // Only draw the top part of the texture (176x70)
     }
 
     @Override
@@ -156,12 +157,12 @@ public class BaseLootBoxRewardScreen extends Screen {
         int screenHeight = this.height;
         int x = (screenWidth - 176) / 2;
         int y = (screenHeight - 70) / 2;
-        drawCenteredString(guiGraphics, this.font, this.title.getString(), this.width / 2, y + 8, titleColor);
+        TextUtils.drawCenteredVerticallyWrappedString(guiGraphics, this.font, this.title.getString(), this.width / 2, y + 18, 170, titleColor);
 
         for (int i = 0; i < rewardItems.size(); i++) {
             ItemStack itemStack = rewardItems.get(i).getItemStack();
             int itemX = (screenWidth - 16) / 2;
-            int itemY = y + 17 + (i * 18);
+            int itemY = y + 17 + (i * 18) + 15;
 
             guiGraphics.renderItem(itemStack, itemX, itemY);
             guiGraphics.renderItemDecorations(this.font, itemStack, itemX, itemY);

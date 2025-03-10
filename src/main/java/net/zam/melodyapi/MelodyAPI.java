@@ -5,6 +5,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.zam.melodyapi.common.network.ClaimRewardPacket;
 import net.zam.melodyapi.common.network.ConsumeLootBoxItemsPacket;
+import net.zam.melodyapi.registry.MelodyComponents;
 import net.zam.melodyapi.registry.MelodyItems;
 import net.zam.melodyapi.registry.MelodyMenuTypes;
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 @Mod(MelodyAPI.MOD_ID)
 public class MelodyAPI {
     public static final String MOD_ID = "melodyapi";
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     public MelodyAPI(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
@@ -31,6 +32,7 @@ public class MelodyAPI {
 
         MelodyItems.register(modEventBus);
         MelodyMenuTypes.register(modEventBus);
+        MelodyComponents.register(modEventBus);
 
     }
 

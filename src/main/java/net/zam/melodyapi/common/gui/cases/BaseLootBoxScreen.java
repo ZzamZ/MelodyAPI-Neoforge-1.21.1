@@ -5,12 +5,14 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.zam.melodyapi.MelodyAPI;
 import net.zam.melodyapi.common.item.rarity.Rarity;
@@ -19,6 +21,9 @@ import net.zam.melodyapi.common.item.rarity.RarityItem;
 import java.util.List;
 
 public class BaseLootBoxScreen<T extends BaseLootBoxMenu<T>> extends AbstractContainerScreen<T> {
+
+    private static final ResourceLocation CHECKMARK_TEXTURE = MelodyAPI.id("textures/gui/checkmark.png");
+
     private final ResourceLocation texture;
     private final ItemStack requiredKeyItem;
     private final ItemStack requiredCaseItem;
@@ -58,21 +63,21 @@ public class BaseLootBoxScreen<T extends BaseLootBoxMenu<T>> extends AbstractCon
     }
 
     private void populateSlotsWithItems() {
-        List<RarityItem> items = this.menu.getLootItems();
+        List<ItemStack> items = this.menu.getItems();
         for (int i = 0; i < items.size() && i < this.menu.slots.size(); i++) {
-            this.menu.slots.get(i).set(items.get(i).getItemStack());
+            this.menu.slots.get(i).set(items.get(i));
         }
     }
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTicks, int mouseX, int mouseY) {
         guiGraphics.blit(texture, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+        renderRarityBorders(guiGraphics);
     }
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
         super.render(guiGraphics, mouseX, mouseY, partialTicks);
-        renderRarityBorders(guiGraphics);
         drawCenteredString(guiGraphics, this.font, this.title.getString(), this.leftPos + this.imageWidth / 2, this.topPos + 10, 0xFFFFFF);
 
         if (showMessage) {
@@ -80,6 +85,18 @@ public class BaseLootBoxScreen<T extends BaseLootBoxMenu<T>> extends AbstractCon
         }
 
         this.renderTooltip(guiGraphics, mouseX, mouseY);
+    }
+
+    @Override
+    protected void renderSlot(GuiGraphics guiGraphics, Slot slot) {
+        super.renderSlot(guiGraphics, slot);
+        ItemStack itemstack = slot.getItem();
+        if(itemstack.has(DataComponents.LOCK)) { // This means it is collected. This was just a easy way to sync the data between the client and the server
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().translate(0, 0, 300);
+            guiGraphics.blit(CHECKMARK_TEXTURE, slot.x + 10, slot.y - 4, 0, 0, 8, 8, 8, 8);
+            guiGraphics.pose().popPose();
+        }
     }
 
     @Override

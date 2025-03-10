@@ -161,7 +161,7 @@ public class BaseSpinScreen extends Screen {
         // Enable scissor test to clip the rendering area
         int scissorX = (int) ((double) (x + 3.5) / this.width * this.minecraft.getWindow().getScreenWidth()); // Adjusted left boundary
         int scissorY = (int) ((double) (this.height - (y + 23 + 18)) / this.height * this.minecraft.getWindow().getScreenHeight());
-        int scissorWidth = (int) ((double) 170.25 / this.width * this.minecraft.getWindow().getScreenWidth()); // Adjusted right boundary
+        int scissorWidth = (int) ((double) 169.75 / this.width * this.minecraft.getWindow().getScreenWidth()); // Adjusted right boundary
         int scissorHeight = (int) ((double) 18 / this.height * this.minecraft.getWindow().getScreenHeight());
         RenderSystem.enableScissor(scissorX, scissorY, scissorWidth, scissorHeight);
 

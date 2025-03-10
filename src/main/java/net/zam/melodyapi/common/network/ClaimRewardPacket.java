@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.zam.melodyapi.MelodyAPI;
+import net.zam.melodyapi.common.data.MelodySavedData;
 import net.zam.melodyapi.common.item.rarity.Rarity;
 import net.zam.melodyapi.common.item.rarity.RarityItem;
 
@@ -20,7 +21,7 @@ public class ClaimRewardPacket implements CustomPacketPayload {
             packet -> packet.reward().getItemStack(),
             ByteBufCodecs.STRING_UTF8,
             packet -> packet.reward.getRarity().name(),
-            ClaimRewardPacket::new
+            ClaimRewardPacket:: new
     );
 
     private final RarityItem reward;
@@ -54,6 +55,7 @@ public class ClaimRewardPacket implements CustomPacketPayload {
                     itemEntity.setTarget(player.getUUID());
                 }
             }
+            MelodySavedData.setCollected(player.getServer(), player, packet.reward().getItemStack().getItem());
         });
     }
 
