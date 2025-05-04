@@ -44,7 +44,6 @@ public class BaseLootBoxRewardScreen extends Screen {
         this.caseTitle = caseTitle;
     }
 
-    // Here is where you can place the updatePlayerCollectedItem method
     private void updatePlayerCollectedItem(Player player, RarityItem item) {
         CompoundTag playerData = player.getPersistentData();
 
@@ -61,7 +60,7 @@ public class BaseLootBoxRewardScreen extends Screen {
 
     private Component determineTitle(RarityItem rarityItem) {
         ItemStack itemStack = rarityItem.getItemStack();
-        if(itemStack.getItem().components().has(DataComponents.JUKEBOX_PLAYABLE)) {
+        if (itemStack.getItem().components().has(DataComponents.JUKEBOX_PLAYABLE)) {
             return Component.translatable(itemStack.getDescriptionId() + ".desc");
         } else {
             return itemStack.getHoverName();
@@ -80,7 +79,6 @@ public class BaseLootBoxRewardScreen extends Screen {
 
         this.claimButton = Button.builder(Component.literal("Claim"), button -> {
             sendClaimRewardPacket();
-            announceReward();
             rewardClaimed = true;
         }).bounds(buttonX, buttonY, 100, 20).build();
 
@@ -108,35 +106,8 @@ public class BaseLootBoxRewardScreen extends Screen {
 
         LOGGER.info("Player's received items saved: " + receivedItems);
 
-        PacketDistributor.sendToServer(new ClaimRewardPacket(selectedItem));
-    }
-
-    private void announceReward() {
-        RarityItem selectedItem = rewardItems.get(0);
-        ItemStack selectedItemStack = selectedItem.getItemStack();
-        Component itemNameOrDescription = selectedItemStack.getItem().components().has(DataComponents.JUKEBOX_PLAYABLE) ?
-                Component.translatable(selectedItemStack.getDescriptionId() + ".desc") :
-                selectedItemStack.getHoverName();
-
-        // Set colors for each component
-        Component playerNameComponent = player.getName().copy().withStyle(style -> style.withColor(0x55FF55));
-        Component itemNameOrDescriptionComponent = itemNameOrDescription.copy().withStyle(style -> style.withColor(selectedItem.getRarity().getColor()));
-        Component caseNameComponent = caseTitle.copy().withStyle(style -> style.withColor(0x90EE90));
-        Component openBracket = Component.literal("[").withStyle(style -> style.withColor(0xADD8E6));
-        Component closeBracket = Component.literal("]").withStyle(style -> style.withColor(0xADD8E6));
-
-        Component message = Component.literal("")
-                .append(playerNameComponent)
-                .append(Component.literal(" opened a ").withStyle(style -> style.withColor(0xADD8E6)))
-                .append(openBracket)
-                .append(caseNameComponent)
-                .append(closeBracket)
-                .append(Component.literal(" and received ").withStyle(style -> style.withColor(0xADD8E6)))
-                .append(Component.literal("[").withStyle(style -> style.withColor(selectedItem.getRarity().getColor())))
-                .append(itemNameOrDescriptionComponent)
-                .append(Component.literal("]").withStyle(style -> style.withColor(selectedItem.getRarity().getColor())));
-
-        player.sendSystemMessage(message);
+        // Send the updated packet with player name and case title
+        PacketDistributor.sendToServer(new ClaimRewardPacket(selectedItem, player.getName().getString(), caseTitle));
     }
 
     @Override
@@ -167,11 +138,6 @@ public class BaseLootBoxRewardScreen extends Screen {
             guiGraphics.renderItem(itemStack, itemX, itemY);
             guiGraphics.renderItemDecorations(this.font, itemStack, itemX, itemY);
         }
-    }
-
-    private void drawCenteredString(GuiGraphics guiGraphics, Font font, String text, int centerX, int y, int color) {
-        int width = font.width(text);
-        guiGraphics.drawString(font, text, centerX - width / 2, y, color, false);
     }
 
     @Override

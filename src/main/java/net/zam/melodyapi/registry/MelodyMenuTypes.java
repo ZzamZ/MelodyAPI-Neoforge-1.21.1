@@ -11,13 +11,14 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.zam.melodyapi.MelodyAPI;
 import net.zam.melodyapi.common.gui.casetest.TestCaseMenu;
 
+import java.util.function.Supplier;
+
 public class MelodyMenuTypes {
     public static final DeferredRegister<MenuType<?>> MENUS =
             DeferredRegister.create(Registries.MENU, MelodyAPI.MOD_ID);
 
     public static final DeferredHolder<MenuType<?>, MenuType<TestCaseMenu>> TEST_CASE =
             registerMenuType("test_case_menu", TestCaseMenu::new);
-
 
     private static <T extends AbstractContainerMenu>DeferredHolder<MenuType<?>, MenuType<T>> registerMenuType(String name, IContainerFactory<T> factory) {
         return MENUS.register(name, () -> IMenuTypeExtension.create(factory));

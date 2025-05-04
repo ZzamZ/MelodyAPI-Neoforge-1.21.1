@@ -6,7 +6,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.zam.melodyapi.MelodyAPI;
-import net.zam.melodyapi.common.component.LoopingComponent;
 import net.zam.melodyapi.common.component.MusicTrackComponent;
 import net.zam.melodyapi.common.component.PausedComponent;
 import net.zam.melodyapi.common.component.PlayingRecordComponent;

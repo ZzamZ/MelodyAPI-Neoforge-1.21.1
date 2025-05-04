@@ -21,6 +21,8 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 
+import java.util.function.Supplier;
+
 @Mod(MelodyAPI.MOD_ID)
 public class MelodyAPI {
     public static final String MOD_ID = "melodyapi";
