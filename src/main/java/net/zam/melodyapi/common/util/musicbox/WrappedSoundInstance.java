@@ -8,7 +8,6 @@ import net.minecraft.client.resources.sounds.SoundInstance;
  * @author Jackson
  */
 public interface WrappedSoundInstance {
-
     /**
      * @return The parent sound instance
      */

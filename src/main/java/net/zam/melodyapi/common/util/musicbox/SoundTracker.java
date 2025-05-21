@@ -14,7 +14,6 @@ import java.util.Optional;
  * No looping logic or callbacks.
  */
 public class SoundTracker {
-
     private static final Int2ObjectArrayMap<SoundInstance> ENTITY_SOUNDS = new Int2ObjectArrayMap<>();
 
     /**
@@ -24,24 +23,16 @@ public class SoundTracker {
     public static void playMusicBox(int entityId, ItemStack record) {
         stopMusicBox(entityId);
 
-        if (record.isEmpty()) {
-            return;
-        }
+        if (record.isEmpty()) return;
 
         ClientLevel level = Minecraft.getInstance().level;
-        if (level == null) {
-            return;
-        }
+        if (level == null) return;
 
         Entity entity = level.getEntity(entityId);
-        if (entity == null) {
-            return;
-        }
+        if (entity == null) return;
 
         Optional<? extends SoundInstance> soundOpt = PlayableRecord.createEntitySound(record, entity, 0, 8);
-        if (soundOpt.isEmpty()) {
-            return;
-        }
+        if (soundOpt.isEmpty()) return;
 
         SoundInstance newSound = soundOpt.get();
         ENTITY_SOUNDS.put(entityId, newSound);
@@ -53,6 +44,7 @@ public class SoundTracker {
      */
     public static void stopMusicBox(int entityId) {
         SoundInstance oldSound = ENTITY_SOUNDS.remove(entityId);
+
         if (oldSound != null) {
             Minecraft.getInstance().getSoundManager().stop(oldSound);
         }

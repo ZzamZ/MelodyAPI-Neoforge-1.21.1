@@ -1,20 +1,17 @@
 package net.zam.melodyapi.common.gui.cases;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.zam.melodyapi.MelodyAPI;
+import net.zam.melodyapi.common.cases.CaseEntry;
 import net.zam.melodyapi.common.item.rarity.Rarity;
 import net.zam.melodyapi.common.item.rarity.RarityItem;
 
@@ -30,9 +27,9 @@ public class BaseLootBoxScreen<T extends BaseLootBoxMenu<T>> extends AbstractCon
     private Button openButton;
     private boolean showMessage;
     private Component message;
+    private CaseEntry entry;
 
-
-    public BaseLootBoxScreen(T menu, Inventory playerInventory, Component title, ResourceLocation texture, ItemStack requiredKeyItem, ItemStack requiredCaseItem) {
+    public BaseLootBoxScreen(T menu, CaseEntry entry, Inventory playerInventory, Component title, ResourceLocation texture, ItemStack requiredKeyItem, ItemStack requiredCaseItem) {
         super(menu, playerInventory, title);
         this.texture = texture;
         this.requiredKeyItem = requiredKeyItem;
@@ -41,6 +38,7 @@ public class BaseLootBoxScreen<T extends BaseLootBoxMenu<T>> extends AbstractCon
         this.imageHeight = 166;
         this.showMessage = false;
         this.message = Component.empty();
+        this.entry = entry;
     }
 
     @Override
@@ -51,7 +49,7 @@ public class BaseLootBoxScreen<T extends BaseLootBoxMenu<T>> extends AbstractCon
 
         this.openButton = Button.builder(Component.literal("Open Case"), button -> {
             if (menu.consumeItems(minecraft.player, requiredKeyItem, requiredCaseItem)) {
-                this.minecraft.setScreen(new BaseSpinScreen(menu.getLootItems(), this.title));
+                this.minecraft.setScreen(new BaseSpinScreen(menu.getLootItems(), this.title, this.entry));
             } else {
                 this.showMessage = true;
                 this.message = Component.literal("You need a key open");
@@ -116,20 +114,7 @@ public class BaseLootBoxScreen<T extends BaseLootBoxMenu<T>> extends AbstractCon
     }
 
     private int getRarityColor(Rarity rarity) {
-        switch (rarity) {
-            case COMMON:
-                return 0xFF3498DB;
-            case UNCOMMON:
-                return 0xFF8A2BE2;
-            case RARE:
-                return 0xFFFF69B4;
-            case VERY_RARE:
-                return 0xFFE74C3C;
-            case ULTRA_RARE:
-                return 0xFFFFD700;
-            default:
-                return 0xFFAAAAAA;
-        }
+        return rarity.getColor();
     }
 
     private void drawCenteredString(GuiGraphics guiGraphics, Font font, String text, int centerX, int y, int color) {

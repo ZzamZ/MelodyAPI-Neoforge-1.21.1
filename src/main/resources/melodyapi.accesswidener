@@ -1,0 +1,3 @@
+accessWidener   v2  named
+
+accessible method net/minecraft/world/item/ItemStack addToTooltip (Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/world/item/Item$TooltipContext;Ljava/util/function/Consumer;Lnet/minecraft/world/item/TooltipFlag;)V

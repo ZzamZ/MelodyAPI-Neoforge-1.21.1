@@ -7,15 +7,15 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
-public class HatItem extends Item {
-
-    public HatItem(Properties properties) {
+public class GatItem extends Item implements Equipable {
+    public GatItem(Properties properties) {
         super(properties);
     }
 
@@ -36,16 +36,14 @@ public class HatItem extends Item {
             if (!player.getInventory().add(existingHat)) {
                 player.drop(existingHat, false);
             }
+
             player.setItemSlot(slot, ItemStack.EMPTY);
         }
 
         ItemStack hatToEquip = heldStack.copy();
         hatToEquip.setCount(1);
-
         player.setItemSlot(slot, hatToEquip);
-
         heldStack.shrink(1);
-
         playEquipSound(world, player);
 
         return new InteractionResultHolder<>(InteractionResult.SUCCESS, heldStack);
@@ -57,21 +55,21 @@ public class HatItem extends Item {
     }
 
     @Override
-    public EquipmentSlot getEquipmentSlot(ItemStack stack) {
+    public EquipmentSlot getEquipmentSlot() {
         return EquipmentSlot.HEAD;
     }
 
     private void playEquipSound(Level world, Player player) {
         if (!world.isClientSide) {
             world.playSound(
-                    null,
-                    player.getX(),
-                    player.getY(),
-                    player.getZ(),
-                    SoundEvents.ARMOR_EQUIP_LEATHER,
-                    SoundSource.PLAYERS,
-                    1.0F,
-                    1.0F
+                null,
+                player.getX(),
+                player.getY(),
+                player.getZ(),
+                SoundEvents.ARMOR_EQUIP_LEATHER,
+                SoundSource.PLAYERS,
+                1.0F,
+                1.0F
             );
         }
     }

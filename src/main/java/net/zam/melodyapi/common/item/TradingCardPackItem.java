@@ -1,7 +1,5 @@
 package net.zam.melodyapi.common.item;
 
-import java.util.List;
-import java.util.Random;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -12,6 +10,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.zam.melodyapi.common.util.CardSet;
 
+import java.util.List;
+import java.util.Random;
+
 public class TradingCardPackItem extends Item {
     private static final Random RANDOM = new Random();
     private static final float ULTRA_RARE_CHANCE = 0.01F;
@@ -19,13 +20,12 @@ public class TradingCardPackItem extends Item {
     // Always final, but now we ensure it's non-null in the constructor
     private final CardSet cardSet;
 
-    public TradingCardPackItem(Item.Properties properties, CardSet cardSet) {
+    public TradingCardPackItem(Properties properties, CardSet cardSet) {
         super(properties);
 
         // Fail fast if the modder passes in a null CardSet
-        if (cardSet == null) {
-            throw new IllegalArgumentException("TradingCardPackItem was passed a null CardSet!");
-        }
+        if (cardSet == null) throw new IllegalArgumentException("TradingCardPackItem was passed a null CardSet!");
+
         this.cardSet = cardSet;
     }
 
@@ -52,8 +52,7 @@ public class TradingCardPackItem extends Item {
             stack.shrink(1);
 
             // Play sound effect
-            level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.BUNDLE_DROP_CONTENTS, SoundSource.PLAYERS, 1.0F, 1.0F);
+            level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BUNDLE_DROP_CONTENTS, SoundSource.PLAYERS, 1.0F, 1.0F);
         }
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
     }

@@ -9,10 +9,9 @@ import net.minecraft.client.resources.sounds.TickableSoundInstance;
  * @author Ocelot
  */
 public class TickableStopListeningSound extends StopListeningSound implements TickableSoundInstance {
-
     private final TickableSoundInstance tickableSource;
 
-    TickableStopListeningSound(TickableSoundInstance source, SoundStopListener listener) {
+    public TickableStopListeningSound(TickableSoundInstance source, SoundStopListener listener) {
         super(source, listener);
         this.tickableSource = source;
     }

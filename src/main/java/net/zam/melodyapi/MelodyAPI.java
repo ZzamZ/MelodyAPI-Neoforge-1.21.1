@@ -1,63 +1,39 @@
 package net.zam.melodyapi;
 
+import com.mojang.logging.LogUtils;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.zam.melodyapi.common.network.ClaimRewardPacket;
 import net.zam.melodyapi.common.network.ConsumeLootBoxItemsPacket;
-import net.zam.melodyapi.registry.MelodyComponents;
-import net.zam.melodyapi.registry.MelodyItems;
-import net.zam.melodyapi.registry.MelodyMenuTypes;
+import net.zam.melodyapi.registry.*;
 import org.slf4j.Logger;
 
-import com.mojang.logging.LogUtils;
-
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-
-import java.util.function.Supplier;
-
-@Mod(MelodyAPI.MOD_ID)
-public class MelodyAPI {
+public class MelodyAPI implements ModInitializer {
     public static final String MOD_ID = "melodyapi";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public MelodyAPI(IEventBus modEventBus, ModContainer modContainer) {
-        modEventBus.addListener(this::commonSetup);
-        modEventBus.addListener(this::registerPayloadHandlers);
+    @Override
+    public void onInitialize() {
+        MelodyComponents.init();
+        MelodyItems.init();
+        MelodyMenuTypes.init();
+        MelodyCaseRewards.init();
+        MelodyCriteriaTriggers.init();
 
-        MelodyItems.register(modEventBus);
-        MelodyMenuTypes.register(modEventBus);
-        MelodyComponents.register(modEventBus);
-
+        registerPayloadHandlers();
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event) {
-    }
+    private static void registerPayloadHandlers() {
+        PayloadTypeRegistry.playC2S().register(ClaimRewardPacket.TYPE, ClaimRewardPacket.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(ClaimRewardPacket.TYPE, ClaimRewardPacket::handle);
 
-    @SubscribeEvent
-    private void registerPayloadHandlers(final RegisterPayloadHandlersEvent event) {
-        final PayloadRegistrar registrar = event.registrar("1");
-
-        registrar.playToServer(ClaimRewardPacket.TYPE, ClaimRewardPacket.STREAM_CODEC, ClaimRewardPacket::handle);
-        registrar.playToServer(ConsumeLootBoxItemsPacket.TYPE, ConsumeLootBoxItemsPacket.STREAM_CODEC, ConsumeLootBoxItemsPacket::handle);
+        PayloadTypeRegistry.playC2S().register(ConsumeLootBoxItemsPacket.TYPE, ConsumeLootBoxItemsPacket.STREAM_CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(ConsumeLootBoxItemsPacket.TYPE, ConsumeLootBoxItemsPacket::handle);
     }
 
     public static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(MelodyAPI.MOD_ID, path);
-    }
-
-
-    @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class ClientModEvents {
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event) {
-        }
     }
 }

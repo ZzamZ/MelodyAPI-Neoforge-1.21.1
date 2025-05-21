@@ -13,11 +13,11 @@ import net.zam.melodyapi.MelodyAPI;
 import java.util.function.Consumer;
 
 public enum PausedComponent implements TooltipProvider {
-
     INSTANCE;
 
     public static final Codec<PausedComponent> CODEC = Codec.unit(INSTANCE);
     public static final StreamCodec<ByteBuf, PausedComponent> STREAM_CODEC = StreamCodec.unit(INSTANCE);
+
     private static final Component TOOLTIP = Component.translatable("item." + MelodyAPI.MOD_ID + ".music_box.paused").withStyle(ChatFormatting.YELLOW);
 
     @Override

@@ -1,7 +1,7 @@
 package net.zam.melodyapi.common.gui.cases;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gui.Font;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -12,10 +12,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
 import net.zam.melodyapi.MelodyAPI;
+import net.zam.melodyapi.common.cases.CaseEntry;
+import net.zam.melodyapi.common.cases.CaseRewards;
 import net.zam.melodyapi.common.item.rarity.RarityItem;
 import net.zam.melodyapi.common.network.ClaimRewardPacket;
+import net.zam.melodyapi.common.util.EntityDataSaver;
 import net.zam.melodyapi.common.util.TextUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,9 +33,10 @@ public class BaseLootBoxRewardScreen extends Screen {
     private final Component title;
     private final int titleColor;
     private final Component caseTitle;
+    private final CaseEntry entry;
     private boolean rewardClaimed = false;
 
-    public BaseLootBoxRewardScreen(List<RarityItem> rewardItems, Player player, Component caseTitle) {
+    public BaseLootBoxRewardScreen(List<RarityItem> rewardItems, Player player, Component caseTitle, CaseEntry entry) {
         super(Component.literal("Reward"));
         this.texture = MelodyAPI.id("textures/gui/spin_gui.png");
         this.rewardItems = rewardItems;
@@ -42,10 +45,11 @@ public class BaseLootBoxRewardScreen extends Screen {
         this.title = determineTitle(rewardItem);
         this.titleColor = rewardItem.getRarity().getColor();
         this.caseTitle = caseTitle;
+        this.entry = entry;
     }
 
     private void updatePlayerCollectedItem(Player player, RarityItem item) {
-        CompoundTag playerData = player.getPersistentData();
+        CompoundTag playerData = ((EntityDataSaver) player).melody$getPersistentData();
 
         if (!playerData.contains("receivedItems")) {
             playerData.put("receivedItems", new CompoundTag());
@@ -91,7 +95,7 @@ public class BaseLootBoxRewardScreen extends Screen {
         // Update the player's collected item data
         updatePlayerCollectedItem(player, selectedItem);
 
-        CompoundTag playerData = player.getPersistentData();
+        CompoundTag playerData = ((EntityDataSaver) player).melody$getPersistentData();
 
         if (!playerData.contains("receivedItems")) {
             playerData.put("receivedItems", new CompoundTag());
@@ -106,8 +110,45 @@ public class BaseLootBoxRewardScreen extends Screen {
 
         LOGGER.info("Player's received items saved: " + receivedItems);
 
+        boolean isComplete = checkCaseCompletion(player);
+
         // Send the updated packet with player name and case title
-        PacketDistributor.sendToServer(new ClaimRewardPacket(selectedItem, player.getName().getString(), caseTitle));
+        ClientPlayNetworking.send(new ClaimRewardPacket(selectedItem, this.player.getName().getString(), this.caseTitle, this.entry.id(), isComplete));
+    }
+
+    private boolean checkCaseCompletion(Player player) {
+        // Get the saved data for this player
+        CompoundTag playerData = ((EntityDataSaver) player).melody$getPersistentData();
+
+        // If no data exists yet, player hasn't collected any items
+        if (!playerData.contains("receivedItems")) {
+            LOGGER.info("Player has no received items data");
+            return false;
+        }
+
+        // Get case items - we need to look up what items belong to this case
+        List<RarityItem> caseItems = CaseRewards.getPossibleRewardsById(this.entry.id());
+        LOGGER.info("Found {} possible rewards for case {}", caseItems.size(), this.entry.id());
+
+        if (caseItems.isEmpty()) {
+            LOGGER.warn("No items found for case {}", this.entry.id());
+            return false;
+        }
+
+        // Check if all items have been collected
+        CompoundTag receivedItems = playerData.getCompound("receivedItems");
+        LOGGER.info("Player has {} received items", receivedItems.getAllKeys().size());
+
+        for (RarityItem item : caseItems) {
+            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item.getItemStack().getItem());
+            if (!receivedItems.getBoolean(itemId.toString())) {
+                LOGGER.info("Item {} not collected yet", itemId);
+                return false; // At least one item hasn't been collected
+            }
+        }
+
+        LOGGER.info("All {} items for case {} have been collected!", caseItems.size(), this.entry.id());
+        return true; // All items have been collected
     }
 
     @Override

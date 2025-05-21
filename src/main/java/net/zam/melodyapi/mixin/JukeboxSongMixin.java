@@ -18,27 +18,21 @@ import java.util.function.Supplier;
 
 @Mixin(JukeboxSong.class)
 public class JukeboxSongMixin implements JukeboxSongExt {
+    @Shadow @Final private Holder<SoundEvent> soundEvent;
+    @Shadow @Final private Component description;
 
-    @Shadow
-    @Final
-    private Component description;
-
-    @Shadow
-    @Final
-    private Holder<SoundEvent> soundEvent;
-
-    @Unique
-    private final Supplier<List<TrackData>> etched$track = Suppliers.memoize(() -> {
+    @Unique private final Supplier<List<TrackData>> melody$track = Suppliers.memoize(() -> {
         String id = this.soundEvent.value().getLocation().toString();
         String[] parts = this.description.getString().split("-", 2);
         if (parts.length < 2) {
             return Collections.singletonList(new TrackData(id, "Minecraft", this.description));
         }
+
         return Collections.singletonList(new TrackData(id, parts[0].trim(), Component.literal(parts[1].trim()).withStyle(this.description.getStyle())));
     });
 
     @Override
-    public List<TrackData> veil$tracks() {
-        return this.etched$track.get();
+    public List<TrackData> melody$tracks() {
+        return this.melody$track.get();
     }
 }
