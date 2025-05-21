@@ -166,9 +166,9 @@ public class BaseSpinScreen extends Screen {
         int y = (screenHeight - 70) / 2; // Adjust height for the top part
 
         // Enable scissor test to clip the rendering area
-        int scissorX = (int) ((x + 3.5) / this.width * this.minecraft.getWindow().getScreenWidth()) - 1; // Adjusted left boundary
+        int scissorX = (int) ((x + 3.5) / this.width * this.minecraft.getWindow().getScreenWidth()); // Adjusted left boundary
         int scissorY = (int) ((double) (this.height - (y + 23 + 18)) / this.height * this.minecraft.getWindow().getScreenHeight());
-        int scissorWidth = (int) (170.25 / this.width * this.minecraft.getWindow().getScreenWidth()) - 2; // Adjusted right boundary
+        int scissorWidth = (int) (170.25 / this.width * this.minecraft.getWindow().getScreenWidth()); // Adjusted right boundary
         int scissorHeight = (int) ((double) 18 / this.height * this.minecraft.getWindow().getScreenHeight());
         RenderSystem.enableScissor(scissorX, scissorY, scissorWidth, scissorHeight);
 
@@ -199,7 +199,7 @@ public class BaseSpinScreen extends Screen {
     private void renderScrollingItems(GuiGraphics guiGraphics, int x, int y) {
         int itemSize = 16; // Size of each item slot
         int totalItems = displayedItems.size();
-        int guiLeftBound = x + 5; // Adjusted left boundary
+        int guiLeftBound = x + 4; // Adjusted left boundary
         int guiRightBound = x + 173; // Adjusted right boundary
 
         // Calculate the starting x position for the center item
