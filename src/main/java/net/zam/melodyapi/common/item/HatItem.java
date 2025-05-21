@@ -14,8 +14,8 @@ import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
-public class GatItem extends Item implements Equipable {
-    public GatItem(Properties properties) {
+public class HatItem extends Item implements Equipable {
+    public HatItem(Properties properties) {
         super(properties);
     }
 
