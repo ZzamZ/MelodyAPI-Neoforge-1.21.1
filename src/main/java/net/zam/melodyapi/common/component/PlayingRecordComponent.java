@@ -14,9 +14,10 @@ import net.zam.melodyapi.MelodyAPI;
 import java.util.function.Consumer;
 
 public record PlayingRecordComponent(ItemStack stack) implements TooltipProvider {
-
-    public static final Codec<PlayingRecordComponent> CODEC = ItemStack.CODEC.xmap(PlayingRecordComponent::new, PlayingRecordComponent::stack);
-    public static final StreamCodec<RegistryFriendlyByteBuf, PlayingRecordComponent> STREAM_CODEC = ItemStack.STREAM_CODEC.map(PlayingRecordComponent::new, PlayingRecordComponent::stack);
+    public static final Codec<PlayingRecordComponent> CODEC = ItemStack.CODEC
+        .xmap(PlayingRecordComponent::new, PlayingRecordComponent::stack);
+    public static final StreamCodec<RegistryFriendlyByteBuf, PlayingRecordComponent> STREAM_CODEC = ItemStack.STREAM_CODEC
+        .map(PlayingRecordComponent::new, PlayingRecordComponent::stack);
 
     private static final Component RECORDS = Component.translatable("item." + MelodyAPI.MOD_ID + ".music_box.records");
 
@@ -27,20 +28,5 @@ public record PlayingRecordComponent(ItemStack stack) implements TooltipProvider
             tooltipAdder.accept(RECORDS);
             this.stack.addToTooltip(DataComponents.JUKEBOX_PLAYABLE, context, tooltipAdder, tooltipFlag);
         }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
-
-        PlayingRecordComponent that = (PlayingRecordComponent) o;
-        return ItemStack.matches(this.stack, that.stack);
-    }
-
-    @Override
-    public int hashCode() {
-        return ItemStack.hashItemAndComponents(this.stack);
     }
 }

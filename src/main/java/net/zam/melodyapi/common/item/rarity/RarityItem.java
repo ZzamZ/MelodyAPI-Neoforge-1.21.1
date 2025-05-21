@@ -1,7 +1,6 @@
 package net.zam.melodyapi.common.item.rarity;
 
 import net.minecraft.world.item.ItemStack;
-import net.zam.melodyapi.common.item.rarity.Rarity;
 
 /**
  * Represents an item with an associated rarity.
@@ -28,7 +27,7 @@ public class RarityItem {
      * @return A copy of the ItemStack to maintain immutability.
      */
     public ItemStack getItemStack() {
-        return itemStack.copy();
+        return this.itemStack.copy();
     }
 
     /**
@@ -37,15 +36,15 @@ public class RarityItem {
      * @return The item's rarity.
      */
     public Rarity getRarity() {
-        return rarity;
+        return this.rarity;
     }
 
     @Override
     public String toString() {
         return "RarityItem{" +
-                "itemStack=" + itemStack +
-                ", rarity=" + rarity +
-                '}';
+            "itemStack=" + this.itemStack +
+            ", rarity=" + this.rarity +
+            '}';
     }
 
     @Override
@@ -55,8 +54,8 @@ public class RarityItem {
 
         RarityItem that = (RarityItem) o;
 
-        if (!itemStack.equals(that.itemStack)) return false;
-        return rarity == that.rarity;
+        if (!this.itemStack.equals(that.itemStack)) return false;
+        return this.rarity == that.rarity;
     }
 
     @Override

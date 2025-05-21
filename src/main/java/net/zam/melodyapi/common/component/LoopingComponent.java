@@ -18,14 +18,10 @@ public enum LoopingComponent implements TooltipProvider {
     public static final Codec<LoopingComponent> CODEC = Codec.unit(INSTANCE);
     public static final StreamCodec<ByteBuf, LoopingComponent> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
-    private static final Component TOOLTIP = Component.translatable(
-            "item." + MelodyAPI.MOD_ID + ".music_box.looping"
-    ).withStyle(ChatFormatting.YELLOW);
+    private static final Component TOOLTIP = Component.translatable("item." + MelodyAPI.MOD_ID + ".music_box.looping").withStyle(ChatFormatting.YELLOW);
 
     @Override
-    public void addToTooltip(Item.TooltipContext context,
-                             Consumer<Component> tooltipAdder,
-                             TooltipFlag tooltipFlag) {
+    public void addToTooltip(Item.TooltipContext context, Consumer<Component> tooltipAdder, TooltipFlag tooltipFlag) {
         tooltipAdder.accept(TOOLTIP);
     }
 }

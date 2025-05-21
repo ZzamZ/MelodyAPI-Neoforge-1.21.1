@@ -19,19 +19,20 @@ import java.util.concurrent.CompletableFuture;
  * @author Ocelot
  */
 public class StopListeningSound implements SoundInstance, SoundStopListener, WrappedSoundInstance {
-
     private final SoundInstance source;
     private final SoundStopListener listener;
     private boolean ignoringEvents;
 
-    StopListeningSound(SoundInstance source, SoundStopListener listener) {
+    public StopListeningSound(SoundInstance source, SoundStopListener listener) {
         this.source = source;
         this.listener = listener;
         this.ignoringEvents = false;
     }
 
     public static StopListeningSound create(SoundInstance source, SoundStopListener listener) {
-        return source instanceof TickableSoundInstance ? new TickableStopListeningSound((TickableSoundInstance) source, listener) : new StopListeningSound(source, listener);
+        return source instanceof TickableSoundInstance tickable
+            ? new TickableStopListeningSound(tickable, listener)
+            : new StopListeningSound(source, listener);
     }
 
     public void stopListening() {
@@ -48,10 +49,9 @@ public class StopListeningSound implements SoundInstance, SoundStopListener, Wra
         return this.source.getLocation();
     }
 
-    @Nullable
     @Override
-    public WeighedSoundEvents resolve(SoundManager soundManager) {
-        return this.source.resolve(soundManager);
+    public @Nullable WeighedSoundEvents resolve(SoundManager manager) {
+        return this.source.resolve(manager);
     }
 
     @Override
@@ -120,8 +120,8 @@ public class StopListeningSound implements SoundInstance, SoundStopListener, Wra
     }
 
     @Override
-    public CompletableFuture<AudioStream> getStream(SoundBufferLibrary soundBuffers, Sound sound, boolean looping) {
-        return this.source.getStream(soundBuffers, sound, looping);
+    public CompletableFuture<AudioStream> getAudioStream(SoundBufferLibrary loader, ResourceLocation id, boolean repeatInstantly) {
+        return this.source.getAudioStream(loader, id, repeatInstantly);
     }
 
     @Override

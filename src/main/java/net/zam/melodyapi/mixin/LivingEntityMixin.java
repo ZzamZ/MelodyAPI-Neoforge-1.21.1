@@ -11,14 +11,16 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LivingEntity.class)
-public abstract class ClientLivingEntityMixin extends Entity {
-
-    public ClientLivingEntityMixin(EntityType<?> entityType, Level level) {
+public abstract class LivingEntityMixin extends Entity {
+    public LivingEntityMixin(EntityType<?> entityType, Level level) {
         super(entityType, level);
     }
 
-    @Inject(method = "tick", at = @At("HEAD"))
-    public void onTick(CallbackInfo ci) {
+    @Inject(
+        method = "tick",
+        at = @At("HEAD")
+    )
+    public void melody$onTick(CallbackInfo ci) {
         if (this.level().isClientSide()) {
             MusicBoxItem.onLivingEntityUpdateClient((LivingEntity) (Object) this);
         }

@@ -9,54 +9,57 @@ import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.level.Level;
 import net.zam.melodyapi.common.item.MusicBoxItem;
 import net.zam.melodyapi.common.util.musicbox.SoundTracker;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.List;
 
 @Mixin(Parrot.class)
 public abstract class ParrotMixin extends Entity {
+    @Shadow @Nullable private BlockPos jukebox;
+    @Shadow private boolean partyParrot;
 
-    @Shadow
-    private BlockPos jukebox;
-    @Shadow
-    private boolean partyParrot;
-
-    @Unique
-    private BlockPos etched$musicPos;
-    @Unique
-    private boolean etched$dancing;
+    @Unique private BlockPos melody$musicPos;
+    @Unique private boolean melody$dancing;
 
     public ParrotMixin(EntityType<?> entityType, Level level) {
         super(entityType, level);
     }
 
-    @Inject(method = "aiStep", at = @At("HEAD"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    public void capture(CallbackInfo ci) {
-        this.etched$musicPos = this.jukebox;
-        this.etched$dancing = this.partyParrot;
+    @Inject(
+        method = "aiStep",
+        at = @At("HEAD")
+    )
+    public void melody$capture(CallbackInfo ci) {
+        this.melody$musicPos = this.jukebox;
+        this.melody$dancing = this.partyParrot;
     }
 
-    @Inject(method = "aiStep", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/ShoulderRidingEntity;aiStep()V"))
-    public void addAudioProviders(CallbackInfo ci) {
-        if (this.etched$musicPos == null || !this.etched$musicPos.closerToCenterThan(this.position(), 3.46)) {
+    @Inject(
+        method = "aiStep",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/animal/ShoulderRidingEntity;aiStep()V"
+        )
+    )
+    public void melody$addAudioProviders(CallbackInfo ci) {
+        if (this.melody$musicPos == null || !this.melody$musicPos.closerToCenterThan(this.position(), 3.46)) {
             this.partyParrot = false;
             this.jukebox = null;
         } else {
-            this.partyParrot = this.etched$dancing;
-            this.jukebox = this.etched$musicPos;
+            this.partyParrot = this.melody$dancing;
+            this.jukebox = this.melody$musicPos;
         }
 
         if (this.level().isClientSide()) {
             List<Entity> entities = this.level().getEntities(this, this.getBoundingBox().inflate(3.45), entity -> {
-                if (!entity.isAlive() || entity.isSpectator()) {
-                    return false;
-                }
+                if (!entity.isAlive() || entity.isSpectator()) return false;
+
                 if (entity == Minecraft.getInstance().player && MusicBoxItem.getPlayingHand((LivingEntity) entity) == null) {
                     return false;
                 }

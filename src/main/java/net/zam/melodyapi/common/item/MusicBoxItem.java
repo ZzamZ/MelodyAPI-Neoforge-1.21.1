@@ -23,13 +23,12 @@ import net.zam.melodyapi.common.component.PlayingRecordComponent;
 import net.zam.melodyapi.common.util.musicbox.PlayableRecord;
 import net.zam.melodyapi.common.util.musicbox.SoundTracker;
 import net.zam.melodyapi.registry.MelodyComponents;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 
 public class MusicBoxItem extends Item {
-
     private static final Map<Integer, ItemStack> PLAYING_RECORDS = new Int2ObjectArrayMap<>();
 
     public MusicBoxItem(Properties properties) {
@@ -40,9 +39,7 @@ public class MusicBoxItem extends Item {
      * Called each client tick for living entities (via mixin or event).
      */
     public static void onLivingEntityUpdateClient(LivingEntity entity) {
-        if (!(entity instanceof Player player)) {
-            return;
-        }
+        if (!(entity instanceof Player player)) return;
 
         ItemStack newPlayingRecord = ItemStack.EMPTY;
 
@@ -81,9 +78,7 @@ public class MusicBoxItem extends Item {
      */
     private static void updatePlaying(Entity entity, ItemStack newRecord) {
         ItemStack oldRecord = PLAYING_RECORDS.getOrDefault(entity.getId(), ItemStack.EMPTY);
-        if (ItemStack.matches(oldRecord, newRecord)) {
-            return;
-        }
+        if (ItemStack.matches(oldRecord, newRecord)) return;
 
         SoundTracker.playMusicBox(entity.getId(), newRecord);
         if (newRecord.isEmpty()) {
@@ -96,11 +91,9 @@ public class MusicBoxItem extends Item {
     /**
      * If item is on the ground as an ItemEntity, update playing if unpaused.
      */
-    @Override
     public boolean onEntityItemUpdate(ItemStack stack, ItemEntity entity) {
-        if (!entity.level().isClientSide()) {
-            return false;
-        }
+        if (!entity.level().isClientSide()) return false;
+
         updatePlaying(entity, !stack.has(MelodyComponents.PAUSED) ? getRecord(stack) : ItemStack.EMPTY);
         return false;
     }
@@ -119,8 +112,10 @@ public class MusicBoxItem extends Item {
             } else {
                 stack.set(MelodyComponents.PAUSED, PausedComponent.INSTANCE);
             }
+
             return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
         }
+
         return InteractionResultHolder.pass(stack);
     }
 
@@ -128,25 +123,23 @@ public class MusicBoxItem extends Item {
      * "Bundle style" SHIFT-click insertion in GUIs/inventories.
      */
     @Override
-    public boolean overrideStackedOnOther(ItemStack boombox, Slot slot, ClickAction clickAction, Player player) {
-        if (clickAction != ClickAction.SECONDARY) {
-            return false;
-        }
+    public boolean overrideStackedOnOther(ItemStack musicbox, Slot slot, ClickAction clickAction, Player player) {
+        if (clickAction != ClickAction.SECONDARY) return false;
 
         ItemStack clickItem = slot.getItem();
         if (clickItem.isEmpty()) {
-            ItemStack record = getRecord(boombox);
+            ItemStack record = getRecord(musicbox);
+
             if (!record.isEmpty()) {
                 player.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 0.8F,
-                        0.8F + player.level().getRandom().nextFloat() * 0.4F);
-                setRecord(boombox, slot.safeInsert(record));
+                    0.8F + player.level().getRandom().nextFloat() * 0.4F);
+                setRecord(musicbox, slot.safeInsert(record));
                 return true;
             }
         } else if (PlayableRecord.isPlayableRecord(clickItem)) {
-            player.playSound(SoundEvents.BUNDLE_INSERT, 0.8F,
-                    0.8F + player.level().getRandom().nextFloat() * 0.4F);
-            ItemStack old = getRecord(boombox);
-            setRecord(boombox, slot.safeTake(clickItem.getCount(), 1, player).split(1));
+            player.playSound(SoundEvents.BUNDLE_INSERT, 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F);
+            ItemStack old = getRecord(musicbox);
+            setRecord(musicbox, slot.safeTake(clickItem.getCount(), 1, player).split(1));
             slot.set(old);
             return true;
         }
@@ -155,38 +148,40 @@ public class MusicBoxItem extends Item {
     }
 
     /**
-     * "Bundle style" SHIFT-click from boombox onto another slot.
+     * "Bundle style" SHIFT-click from musicbox onto another slot.
      */
     @Override
-    public boolean overrideOtherStackedOnMe(ItemStack boombox, ItemStack clickItem,
-                                            Slot slot, ClickAction clickAction,
-                                            Player player, SlotAccess slotAccess) {
-        if (clickAction != ClickAction.SECONDARY) {
-            return false;
-        }
-        if (!slot.allowModification(player)) {
-            return false;
-        }
+    public boolean overrideOtherStackedOnMe(
+        ItemStack musicbox,
+        ItemStack clickItem,
+        Slot slot,
+        ClickAction clickAction,
+        Player player,
+        SlotAccess slotAccess
+    ) {
+        if (clickAction != ClickAction.SECONDARY) return false;
+        if (!slot.allowModification(player)) return false;
 
         if (clickItem.isEmpty()) {
-            ItemStack record = getRecord(boombox);
+            ItemStack record = getRecord(musicbox);
+
             if (!record.isEmpty()) {
-                player.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 0.8F,
-                        0.8F + player.level().getRandom().nextFloat() * 0.4F);
+                player.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F);
                 slotAccess.set(record);
-                setRecord(boombox, ItemStack.EMPTY);
+                setRecord(musicbox, ItemStack.EMPTY);
                 return true;
             }
         } else if (PlayableRecord.isPlayableRecord(clickItem)) {
-            ItemStack old = getRecord(boombox);
+            ItemStack old = getRecord(musicbox);
+
             if (old.isEmpty() || clickItem.getCount() == 1) {
-                player.playSound(SoundEvents.BUNDLE_INSERT, 0.8F,
-                        0.8F + player.level().getRandom().nextFloat() * 0.4F);
-                setRecord(boombox, clickItem.split(1));
+                player.playSound(SoundEvents.BUNDLE_INSERT, 0.8F, 0.8F + player.level().getRandom().nextFloat() * 0.4F);
+                setRecord(musicbox, clickItem.split(1));
                 slotAccess.set(old);
                 return true;
             }
         }
+
         return false;
     }
 
@@ -210,7 +205,6 @@ public class MusicBoxItem extends Item {
             tooltipComponents.add(Component.literal("No disc inserted").withStyle(ChatFormatting.GRAY));
         }
     }
-
 
     /**
      * Helper: Which hand is playing (if any)?

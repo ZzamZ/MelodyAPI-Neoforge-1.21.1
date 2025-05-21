@@ -13,7 +13,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 public interface ContainerItem {
-
     static int findSlotMatchingItem(Inventory inventory, ItemStack stack) {
         for (int i = 0; i < inventory.items.size(); ++i) {
             ItemStack slotStack = inventory.items.get(i);

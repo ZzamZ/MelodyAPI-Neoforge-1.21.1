@@ -19,11 +19,9 @@ public class TestCase extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         if (!level.isClientSide) {
-            player.openMenu(new SimpleMenuProvider(
-                    (id, inv, player1) -> new TestCaseMenu(id, inv, player1),
-                    Component.translatable("container.test_case")
-            ));
+            player.openMenu(new SimpleMenuProvider(TestCaseMenu::new, Component.translatable("container.test_case")));
         }
+
         return new InteractionResultHolder<>(InteractionResult.SUCCESS, player.getItemInHand(hand));
     }
 }

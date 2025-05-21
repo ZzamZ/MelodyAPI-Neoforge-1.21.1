@@ -6,6 +6,5 @@ import java.util.List;
 
 @ApiStatus.Internal
 public interface JukeboxSongExt {
-
-    List<TrackData> veil$tracks();
+    List<TrackData> melody$tracks();
 }

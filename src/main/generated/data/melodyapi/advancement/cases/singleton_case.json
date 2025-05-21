@@ -1,0 +1,28 @@
+{
+  "criteria": {
+    "got_reward_singleton_case": {
+      "conditions": {
+        "id": "melodyapi:singleton_case"
+      },
+      "trigger": "melodyapi:case_reward"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.melodyapi.singleton_case.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "melodyapi:singleton_case"
+    },
+    "title": {
+      "translate": "advancement.melodyapi.singleton_case.title"
+    }
+  },
+  "requirements": [
+    [
+      "got_reward_singleton_case"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

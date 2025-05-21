@@ -1,5 +1,6 @@
 package net.zam.melodyapi.common.gui.cases;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.Container;
 import net.minecraft.world.LockCode;
@@ -9,7 +10,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.zam.melodyapi.common.cases.CaseEntry;
 import net.zam.melodyapi.common.data.MelodySavedData;
 import net.zam.melodyapi.common.item.rarity.RarityItem;
 import net.zam.melodyapi.common.network.ConsumeLootBoxItemsPacket;
@@ -20,9 +21,9 @@ public abstract class BaseLootBoxMenu<T extends BaseLootBoxMenu<T>> extends Abst
     private final ReadOnlyInventory lootInventory;
     private final List<RarityItem> lootItems;
 
-    protected BaseLootBoxMenu(MenuType<T> menuType, int id, Inventory playerInventory, List<RarityItem> lootItems, Player player) {
+    protected BaseLootBoxMenu(MenuType<T> menuType, int id, Inventory playerInventory, CaseEntry entry, Player player) {
         super(menuType, id);
-        this.lootItems = lootItems;
+        this.lootItems = entry.possibleRewards();
 
         this.lootInventory = new ReadOnlyInventory(this.lootItems.size());
 
@@ -85,7 +86,7 @@ public abstract class BaseLootBoxMenu<T extends BaseLootBoxMenu<T>> extends Abst
 
         if (keyConsumed && caseConsumed) {
             if (player.level().isClientSide()) {
-                PacketDistributor.sendToServer(new ConsumeLootBoxItemsPacket(keyItem, caseItem));
+                ClientPlayNetworking.send(new ConsumeLootBoxItemsPacket(keyItem, caseItem));
             }
             return true;
         }

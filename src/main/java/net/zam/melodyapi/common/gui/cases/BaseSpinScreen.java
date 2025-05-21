@@ -11,6 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.zam.melodyapi.MelodyAPI;
+import net.zam.melodyapi.common.cases.CaseEntry;
 import net.zam.melodyapi.common.item.rarity.Rarity;
 import net.zam.melodyapi.common.item.rarity.RarityItem;
 import net.zam.melodyapi.common.util.TextUtils;
@@ -32,13 +33,15 @@ public class BaseSpinScreen extends Screen {
     private long stopTime; // To track when the spinning stops
     private boolean rewardSelected;
     private final Component caseTitle; // Add a case title
+    private final CaseEntry entry;
     private Player player;
     private RarityItem selectedItem;
 
-    public BaseSpinScreen(List<RarityItem> lootItems, Component caseTitle) {
+    public BaseSpinScreen(List<RarityItem> lootItems, Component caseTitle, CaseEntry entry) {
         super(Component.literal("Spinning..."));
         this.texture = MelodyAPI.id("textures/gui/spin_gui.png");
         this.caseTitle = caseTitle;
+        this.entry = entry;
         this.displayedItems = new ArrayList<>();
         this.spinDuration = 400 + new Random().nextInt(100);
         this.random = new Random();
@@ -88,7 +91,7 @@ public class BaseSpinScreen extends Screen {
         }
 
         if (rewardSelected && System.currentTimeMillis() - stopTime >= 500) { // Check if half a second has passed
-            this.minecraft.setScreen(new BaseLootBoxRewardScreen(List.of(selectedItem), this.minecraft.player, caseTitle));
+            this.minecraft.setScreen(new BaseLootBoxRewardScreen(List.of(selectedItem), this.minecraft.player, this.caseTitle, this.entry));
         }
     }
 
@@ -119,21 +122,25 @@ public class BaseSpinScreen extends Screen {
             // 1.16% chance for very rare (116 out of 10000)
             displayedItems.add(getRandomItemByRarity(Rarity.VERY_RARE));
         } else {
-            // 0.34% chance for ultra rare (34 out of 10000)
+            // 0.34% chance for ultra-rare (34 out of 10000)
             displayedItems.add(getRandomItemByRarity(Rarity.ULTRA_RARE));
         }
     }
 
     private RarityItem getRandomItemByRarity(Rarity rarity) {
         List<RarityItem> filteredItems = new ArrayList<>();
-        for (RarityItem item : items) {
-            if (item.getRarity() == rarity) {
-                filteredItems.add(item);
-            }
-        }
+        this.items.stream().filter(item -> item.getRarity() == rarity).forEach(filteredItems::add);
+
         if (filteredItems.isEmpty()) {
+            // If no items of the requested rarity, fall back to any available item
+            if (!this.items.isEmpty()) {
+                return this.items.get(random.nextInt(this.items.size()));
+            }
+
+            // Only use music disc as absolute last resort if items list is completely empty
             return new RarityItem(new ItemStack(Items.MUSIC_DISC_13), Rarity.COMMON);
         }
+
         return filteredItems.get(random.nextInt(filteredItems.size()));
     }
 
@@ -159,9 +166,9 @@ public class BaseSpinScreen extends Screen {
         int y = (screenHeight - 70) / 2; // Adjust height for the top part
 
         // Enable scissor test to clip the rendering area
-        int scissorX = (int) ((double) (x + 3.5) / this.width * this.minecraft.getWindow().getScreenWidth()); // Adjusted left boundary
+        int scissorX = (int) ((x + 3.5) / this.width * this.minecraft.getWindow().getScreenWidth()) - 1; // Adjusted left boundary
         int scissorY = (int) ((double) (this.height - (y + 23 + 18)) / this.height * this.minecraft.getWindow().getScreenHeight());
-        int scissorWidth = (int) ((double) 170.25 / this.width * this.minecraft.getWindow().getScreenWidth()); // Adjusted right boundary
+        int scissorWidth = (int) (170.25 / this.width * this.minecraft.getWindow().getScreenWidth()) - 2; // Adjusted right boundary
         int scissorHeight = (int) ((double) 18 / this.height * this.minecraft.getWindow().getScreenHeight());
         RenderSystem.enableScissor(scissorX, scissorY, scissorWidth, scissorHeight);
 
@@ -174,13 +181,13 @@ public class BaseSpinScreen extends Screen {
         RarityItem selectedItem = displayedItems.get(selectedIndex);
 
         ItemStack selectedItemStack = selectedItem.getItemStack();
-        Component displayNameOrDescription = selectedItemStack.getItem().components().has(DataComponents.JUKEBOX_PLAYABLE) ?
-                Component.translatable(selectedItemStack.getDescriptionId() + ".desc") :
-                selectedItemStack.getHoverName();
+        Component displayNameOrDescription = selectedItemStack.getItem().components().has(DataComponents.JUKEBOX_PLAYABLE)
+            ? Component.translatable(selectedItemStack.getDescriptionId() + ".desc")
+            : selectedItemStack.getHoverName();
 
         TextUtils.drawCenteredWrappedString(guiGraphics, this.font, displayNameOrDescription.getString(), this.width / 2, y + 45, 170, getRarityColor(selectedItem.getRarity()));
 
-        // Draw the case title above the spinning items (after super.render to ensure it's on top)
+        // Draw the case title above the spinning items (after super.render to ensure its on top)
         drawCenteredString(guiGraphics, this.font, caseTitle.getString(), this.width / 2, y - 5 + 14, 0xFFFFFF); // Moved the title down
     }
 
@@ -204,7 +211,7 @@ public class BaseSpinScreen extends Screen {
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
                 RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f); // Remove fade effect
-                guiGraphics.fill((int) itemX - 1, y - 1, (int) itemX + 17, y + 17, getRarityColor(rarityItem.getRarity())); // Draw border
+                guiGraphics.fill((int) itemX, y - 1, (int) itemX + 17, y + 17, getRarityColor(rarityItem.getRarity())); // Draw border
                 guiGraphics.renderItem(rarityItem.getItemStack(), (int) itemX, y);
                 guiGraphics.renderItemDecorations(this.font, rarityItem.getItemStack(), (int) itemX, y);
                 RenderSystem.disableBlend();
@@ -215,20 +222,7 @@ public class BaseSpinScreen extends Screen {
     }
 
     private int getRarityColor(Rarity rarity) {
-        switch (rarity) {
-            case COMMON:
-                return 0xFF3498DB;
-            case UNCOMMON:
-                return 0xFF8A2BE2;
-            case RARE:
-                return 0xFFFF69B4;
-            case VERY_RARE:
-                return 0xFFE74C3C;
-            case ULTRA_RARE:
-                return 0xFFFFD700;
-            default:
-                return 0xFFAAAAAA;
-        }
+        return rarity.getColor();
     }
 
     @Override

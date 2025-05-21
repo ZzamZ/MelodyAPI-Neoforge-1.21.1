@@ -1,14 +1,16 @@
 {
   "required": true,
+  "minVersion": "0.8",
   "package": "net.zam.melodyapi.mixin",
   "compatibilityLevel": "JAVA_21",
-  "minVersion": "0.8",
-  "client": [
-    "ClientLivingEntityMixin",
-    "ParrotMixin"
-  ],
   "mixins": [
+    "EntityMixin",
+    "ItemEntityMixin",
     "JukeboxSongMixin"
+  ],
+  "client": [
+    "LivingEntityMixin",
+    "ParrotMixin"
   ],
   "injectors": {
     "defaultRequire": 1

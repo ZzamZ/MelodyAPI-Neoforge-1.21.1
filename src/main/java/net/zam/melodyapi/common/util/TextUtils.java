@@ -7,18 +7,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TextUtils {
-
-    public static void drawCenteredWrappedString(GuiGraphics guiGraphics, Font font, String text, int x, int y, int maxWidth, int color) {
+    public static void drawCenteredWrappedString(GuiGraphics graphics, Font font, String text, int x, int y, int maxWidth, int color) {
         List<String> wrappedLines = wrapString(font, text, maxWidth);
         int lineHeight = font.lineHeight;
 
         for (int i = 0; i < wrappedLines.size(); i++) {
             int width = font.width(wrappedLines.get(i));
-            guiGraphics.drawString(font, wrappedLines.get(i), x - width / 2, y + (i * lineHeight), color, false);
+            graphics.drawString(font, wrappedLines.get(i), x - width / 2, y + (i * lineHeight), color, false);
         }
     }
 
-    public static void drawCenteredVerticallyWrappedString(GuiGraphics guiGraphics, Font font, String text, int x, int y, int maxWidth, int color) {
+    public static void drawCenteredVerticallyWrappedString(GuiGraphics graphics, Font font, String text, int x, int y, int maxWidth, int color) {
         List<String> wrappedLines = wrapString(font, text, maxWidth);
         int lineHeight = font.lineHeight;
 
@@ -26,7 +25,7 @@ public class TextUtils {
 
         for (int i = 0; i < wrappedLines.size(); i++) {
             int width = font.width(wrappedLines.get(i));
-            guiGraphics.drawString(font, wrappedLines.get(i), x - width / 2, startY + (i * lineHeight), color, false);
+            graphics.drawString(font, wrappedLines.get(i), x - width / 2, startY + (i * lineHeight), color, false);
         }
     }
 

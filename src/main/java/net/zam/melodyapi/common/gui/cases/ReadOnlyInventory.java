@@ -4,6 +4,8 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Arrays;
+
 public class ReadOnlyInventory implements Container {
     private final ItemStack[] items;
 
@@ -26,6 +28,7 @@ public class ReadOnlyInventory implements Container {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -42,18 +45,16 @@ public class ReadOnlyInventory implements Container {
             if (this.items[index].getCount() <= count) {
                 itemstack = this.items[index];
                 this.items[index] = ItemStack.EMPTY;
-                this.setChanged();
-                return itemstack;
             } else {
                 itemstack = this.items[index].split(count);
 
                 if (this.items[index].isEmpty()) {
                     this.items[index] = ItemStack.EMPTY;
                 }
-
-                this.setChanged();
-                return itemstack;
             }
+
+            this.setChanged();
+            return itemstack;
         } else {
             return ItemStack.EMPTY;
         }
@@ -92,9 +93,7 @@ public class ReadOnlyInventory implements Container {
 
     @Override
     public void clearContent() {
-        for (int i = 0; i < this.items.length; i++) {
-            this.items[i] = ItemStack.EMPTY;
-        }
+        Arrays.fill(this.items, ItemStack.EMPTY);
     }
 
     @Override

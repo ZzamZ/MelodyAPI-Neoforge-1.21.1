@@ -7,7 +7,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.zam.melodyapi.MelodyAPI;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -24,21 +23,20 @@ import java.util.regex.Pattern;
  * @since 2.0.0
  */
 public record TrackData(String url, String artist, Component title) {
-
     public static final TrackData EMPTY = new TrackData(null, "Unknown", Component.literal("Custom Music"));
-    public static final Codec<TrackData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<TrackData> CODEC = RecordCodecBuilder.create(instance ->
+        instance.group(
             Codec.STRING.fieldOf("Url").forGetter(TrackData::url),
-            Codec.STRING.optionalFieldOf("Author", EMPTY.artist()).forGetter(TrackData::artist),
+            Codec.STRING.fieldOf("Artist").forGetter(TrackData::artist),
             ComponentSerialization.CODEC.optionalFieldOf("Title", EMPTY.title()).forGetter(TrackData::title)
-    ).apply(instance, TrackData::new));
+        ).apply(instance, TrackData::new)
+    );
     public static final StreamCodec<RegistryFriendlyByteBuf, TrackData> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8,
-            TrackData::url,
-            ByteBufCodecs.STRING_UTF8,
-            TrackData::artist,
-            ComponentSerialization.STREAM_CODEC,
-            TrackData::title,
-            TrackData::new);
+        ByteBufCodecs.STRING_UTF8, TrackData::url,
+        ByteBufCodecs.STRING_UTF8, TrackData::artist,
+        ComponentSerialization.STREAM_CODEC, TrackData::title,
+        TrackData::new
+    );
 
     private static final Pattern RESOURCE_LOCATION_PATTERN = Pattern.compile("[a-z0-9_.-]+");
 
@@ -49,16 +47,14 @@ public record TrackData(String url, String artist, Component title) {
      * @return Whether the data is valid
      */
     public static boolean isValidURL(@Nullable String url) {
-        if (url == null) {
-            return false;
-        }
-        if (isLocalSound(url)) {
-            return true;
-        }
+        if (url == null) return false;
+
+        if (isLocalSound(url)) return true;
+
         try {
             String scheme = new URI(url).getScheme();
             return "http".equals(scheme) || "https".equals(scheme);
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException exception) {
             return false;
         }
     }
@@ -70,18 +66,15 @@ public record TrackData(String url, String artist, Component title) {
      * @return Whether that sound can be played as a local sound event
      */
     public static boolean isLocalSound(@Nullable String url) {
-        if (url == null) {
-            return false;
-        }
+        if (url == null) return false;
+
         String[] parts = url.split(":");
-        if (parts.length > 2) {
-            return false;
-        }
+        if (parts.length > 2) return false;
+
         for (String part : parts) {
-            if (!RESOURCE_LOCATION_PATTERN.matcher(part).matches()) {
-                return false;
-            }
+            if (!RESOURCE_LOCATION_PATTERN.matcher(part).matches()) return false;
         }
+
         return true;
     }
 
